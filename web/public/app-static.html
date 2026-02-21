@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Morkis — The Honesty Monster</title>
+    <link rel="icon" type="image/png" href="https://res.cloudinary.com/yevhenii-kalashnyk/image/upload/e_background_removal/c_fill,ar_3:4,g_auto,f_png/v1771693879/Gemini_Generated_Image_3goprg3goprg3gop_l9flik.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cream: '#F7F7F7',
+                        ink: '#3C3C3C',
+                        moss: '#006D5B',
+                        mint: '#A8E6CF',
+                        coral: '#FF4B4B',
+                        sunshine: '#FFC800',
+                        lavender: '#CE82FF',
+                        sky: '#1CB0F6',
+                        muted: '#AFAFAF',
+                        bite: '#FF4B4B',
+                        chill: '#006D5B',
+                    },
+                    fontFamily: {
+                        display: ['Bricolage Grotesque', 'sans-serif'],
+                        body: ['DM Sans', 'sans-serif'],
+                        mono: ['Space Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { background: #FFFFFF; color: #3C3C3C; font-family: 'DM Sans', sans-serif; font-size: 16px; }
+
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        .card {
+            background: #fff;
+            border: 2px solid #E5E5E5;
+            border-radius: 1rem;
+        }
+        .card-hover { transition: transform 0.2s, box-shadow 0.2s; }
+        .card-hover:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); transform: translateY(-2px); }
+
+        .btn {
+            border: none;
+            border-radius: 999px;
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-weight: 700;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.15);
+            cursor: pointer;
+            transition: all 0.15s;
+            position: relative;
+            top: 0;
+        }
+        .btn:active, .btn:hover {
+            box-shadow: 0 2px 0 rgba(0,0,0,0.15);
+            top: 2px;
+        }
+
+        @keyframes float {
+            0%,100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .float { animation: float 3.5s ease-in-out infinite; }
+
+        @keyframes wiggle {
+            0%,100% { transform: rotate(0deg); }
+            25% { transform: rotate(-4deg); }
+            75% { transform: rotate(4deg); }
+        }
+        .wiggle { animation: wiggle 0.5s ease; }
+
+        .marker { background: linear-gradient(180deg, transparent 60%, rgba(0, 109, 91, 0.2) 40%); padding: 0 2px; }
+
+        input[type="range"] {
+            -webkit-appearance: none; appearance: none;
+            width: 100%; height: 10px;
+            border-radius: 999px; background: #E5E5E5;
+            border: none; outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 28px; height: 28px;
+            border-radius: 50%; background: #006D5B;
+            border: none; cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        }
+
+        /* Mobile tab bar */
+        .mobile-tabs {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: #fff; border-top: 1px solid #E5E5E5;
+            padding: 6px 0 calc(6px + env(safe-area-inset-bottom));
+            z-index: 50; display: flex;
+        }
+        @media(min-width:768px) { .mobile-tabs { display: none !important; } }
+
+        .tab { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:4px 0; cursor:pointer; color:#AFAFAF; }
+        .tab.active svg { color: #006D5B; }
+        .tab.active span { color: #006D5B; }
+
+        /* Desktop nav */
+        .desktop-nav { display: none; }
+        @media(min-width:768px) {
+            .desktop-nav {
+                display: flex; position: fixed; top: 0; left: 0; right: 0;
+                background: rgba(247,247,247,0.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+                border-bottom: 1px solid rgba(60,60,60,0.1); z-index: 50;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ======== DESKTOP NAV ======== -->
+<nav class="desktop-nav">
+    <div class="max-w-7xl mx-auto w-full px-6 py-4 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2 no-underline">
+            <img src="https://res.cloudinary.com/yevhenii-kalashnyk/image/upload/e_background_removal/c_fill,ar_3:4,g_auto,f_png/v1771693879/Gemini_Generated_Image_3goprg3goprg3gop_l9flik.png" alt="Morkis" class="w-8 h-10 object-contain">
+            <span class="font-display text-xl tracking-wide text-ink">MORKIS</span>
+        </a>
+        <div class="flex items-center gap-1">
+            <button onclick="goTo('screen-home')" class="nav-link px-4 py-2 rounded-full font-display text-sm font-bold text-ink/50 hover:bg-ink/5 transition-colors" data-screen="screen-home">Home</button>
+            <button onclick="goTo('screen-contract')" class="nav-link px-4 py-2 rounded-full font-display text-sm font-bold text-ink/50 hover:bg-ink/5 transition-colors" data-screen="screen-contract">New Pact</button>
+            <button onclick="goTo('screen-group')" class="nav-link px-4 py-2 rounded-full font-display text-sm font-bold text-ink/50 hover:bg-ink/5 transition-colors" data-screen="screen-group">Group</button>
+            <button onclick="goTo('screen-shop')" class="nav-link px-4 py-2 rounded-full font-display text-sm font-bold text-ink/50 hover:bg-ink/5 transition-colors" data-screen="screen-shop">Shop</button>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="card px-3 py-1 flex items-center gap-1.5" style="border-width:2px;">
+                <span class="text-sm"><i data-lucide="flame" class="w-4 h-4 text-coral inline"></i></span>
+                <span class="font-display text-sm font-extrabold">12</span>
+            </div>
+            <div class="w-8 h-8 bg-moss/10 border-2 border-ink rounded-full flex items-center justify-center text-xs font-bold text-moss">EK</div>
+        </div>
+    </div>
+</nav>
+
+<!-- ======== MOBILE TAB BAR ======== -->
+<div class="mobile-tabs" id="mobile-tabs">
+    <div class="tab active" onclick="goTo('screen-home')" data-screen="screen-home">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+        <span class="font-display text-[9px] font-bold">Home</span>
+    </div>
+    <div class="tab" onclick="goTo('screen-contract')" data-screen="screen-contract">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        <span class="font-display text-[9px] font-bold">Pact</span>
+    </div>
+    <div class="tab" onclick="goTo('screen-group')" data-screen="screen-group">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        <span class="font-display text-[9px] font-bold">Group</span>
+    </div>
+    <div class="tab" onclick="goTo('screen-shop')" data-screen="screen-shop">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        <span class="font-display text-[9px] font-bold">Shop</span>
+    </div>
+</div>
+
+<!-- ================================ -->
+<!-- SCREEN: HOME                     -->
+<!-- ================================ -->
+<div id="screen-home" class="screen active">
+    <div class="max-w-5xl mx-auto w-full px-5 pt-4 pb-24 md:pt-20 md:pb-12">
+
+        <!-- Mobile greeting -->
+        <div class="flex items-center justify-between mb-6 md:hidden">
+            <div>
+                <div class="font-display text-xl font-extrabold">Hey, Erik</div>
+                <div class="font-body text-sm text-muted">Day 12 of being honest</div>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="card px-3 py-1 flex items-center gap-1.5" style="border-width:2px;">
+                    <span class="text-base"><i data-lucide="flame" class="w-4 h-4 text-coral inline"></i></span>
+                    <span class="font-display text-base font-extrabold">12</span>
+                </div>
+                <div class="w-8 h-8 bg-moss/10 border-2 border-ink rounded-full flex items-center justify-center text-xs font-bold text-moss">EK</div>
+            </div>
+        </div>
+
+        <!-- Desktop greeting -->
+        <div class="hidden md:flex items-center justify-between mb-8">
+            <div>
+                <div class="font-display text-3xl font-extrabold">Hey, Erik</div>
+                <div class="font-body text-base text-muted">Day 12 of being honest</div>
+            </div>
+        </div>
+
+        <!-- Main grid: desktop 2-col, mobile stack -->
+        <div class="grid md:grid-cols-5 gap-5">
+
+            <!-- Left column (3/5) -->
+            <div class="md:col-span-3 space-y-5">
+
+                <!-- Morkis Habitat -->
+                <div class="card p-6 text-center" style="border-color: #006D5B;">
+                    <div class="float inline-block">
+                        <img src="https://res.cloudinary.com/yevhenii-kalashnyk/image/upload/e_background_removal/c_fill,ar_3:4,g_auto,f_png/v1771693879/Gemini_Generated_Image_3goprg3goprg3gop_l9flik.png" alt="Morkis" class="w-24 md:w-32 object-contain mx-auto">
+                    </div>
+                    <div class="mt-3 font-display text-base font-bold text-moss">€340 saved by fear</div>
+                </div>
+
+                <!-- Active Pacts -->
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="font-display text-base font-bold uppercase tracking-widest">Active Pacts</div>
+                        <button onclick="goTo('screen-contract')" class="font-display text-sm font-bold text-moss uppercase tracking-widest">+ NEW</button>
+                    </div>
+                    <div class="space-y-3" id="pact-list">
+                        <div class="card p-4" style="border-color: #006D5B;">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-moss/10 border-2 border-moss rounded-lg flex items-center justify-center"><i data-lucide="utensils" class="w-5 h-5 text-moss"></i></div>
+                                    <div>
+                                        <div class="font-display text-base font-bold">No Wolt this week</div>
+                                        <div class="font-mono text-xs text-muted">3 days remaining</div>
+                                    </div>
+                                </div>
+                                <div class="font-display text-base font-extrabold text-moss">€30</div>
+                            </div>
+                            <div class="w-full h-3 bg-cream border-2 border-ink/10 rounded-full overflow-hidden">
+                                <div class="h-full bg-moss rounded-full" style="width:57%"></div>
+                            </div>
+                            <div class="flex justify-between mt-1.5">
+                                <span class="font-mono text-xs text-muted">Day 4/7</span>
+                                <span class="font-mono text-xs text-moss font-bold">On track ✓</span>
+                            </div>
+                        </div>
+
+                        <div class="card p-4 cursor-pointer" style="border-color: #FF4B4B;" onclick="goTo('screen-bite')">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-coral/10 border-2 border-coral rounded-lg flex items-center justify-center"><i data-lucide="coffee" class="w-5 h-5 text-coral"></i></div>
+                                    <div>
+                                        <div class="font-display text-base font-bold">Max 2 fikas this week</div>
+                                        <div class="font-mono text-xs text-coral"><i data-lucide="alert-triangle" class="w-3 h-3 inline text-coral"></i> 2/2 used — careful!</div>
+                                    </div>
+                                </div>
+                                <div class="font-display text-base font-extrabold text-coral">€20</div>
+                            </div>
+                            <div class="w-full h-3 bg-cream border-2 border-ink/10 rounded-full overflow-hidden">
+                                <div class="h-full bg-coral rounded-full" style="width:85%"></div>
+                            </div>
+                            <div class="flex justify-between mt-1.5">
+                                <span class="font-mono text-xs text-muted">Day 6/7</span>
+                                <span class="font-mono text-xs text-coral font-bold">Danger zone</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right column (2/5) -->
+            <div class="md:col-span-2 space-y-5">
+
+                <!-- IP -->
+                <div class="flex items-center justify-between p-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-mint/20 border-2 border-moss rounded-xl flex items-center justify-center font-display text-base font-extrabold text-moss">IP</div>
+                        <div>
+                            <div class="font-display text-xl font-extrabold">2,340</div>
+                            <div class="font-mono text-xs text-muted uppercase tracking-widest">Integrity Points</div>
+                        </div>
+                    </div>
+                    <div class="font-display text-base font-bold text-moss">+180</div>
+                </div>
+
+                <!-- Trust Streak -->
+                <div class="p-4">
+                    <div class="font-display text-sm font-bold uppercase tracking-widest mb-3">Trust Streak</div>
+                    <div class="flex gap-1.5">
+                        <div class="flex-1 h-8 bg-moss rounded-lg border-2 border-ink flex items-center justify-center text-xs text-white font-bold">M</div>
+                        <div class="flex-1 h-8 bg-moss rounded-lg border-2 border-ink flex items-center justify-center text-xs text-white font-bold">T</div>
+                        <div class="flex-1 h-8 bg-moss rounded-lg border-2 border-ink flex items-center justify-center text-xs text-white font-bold">W</div>
+                        <div class="flex-1 h-8 bg-moss rounded-lg border-2 border-ink flex items-center justify-center text-xs text-white font-bold">T</div>
+                        <div class="flex-1 h-8 bg-moss/20 rounded-lg border-2 border-ink/20 flex items-center justify-center text-xs text-ink/30 font-bold">F</div>
+                        <div class="flex-1 h-8 bg-cream rounded-lg border-2 border-ink/10 flex items-center justify-center text-xs text-ink/20 font-bold">S</div>
+                        <div class="flex-1 h-8 bg-cream rounded-lg border-2 border-ink/10 flex items-center justify-center text-xs text-ink/20 font-bold">S</div>
+                    </div>
+                    <div class="mt-2 font-mono text-xs text-muted text-center">Don’t break it. Morkis gets dusty and sad.</div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="goTo('screen-contract')" class="btn px-3 py-3 bg-moss text-white text-sm uppercase tracking-widest">+ New Pact</button>
+                    <button onclick="goTo('screen-group')" class="btn px-3 py-3 bg-cream text-ink border-2 border-ink/10 text-sm uppercase tracking-widest"><i data-lucide="users" class="w-4 h-4 inline mr-1"></i>Group</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================================ -->
+<!-- SCREEN: NEW PACT (CONTRACT)      -->
+<!-- ================================ -->
+<div id="screen-contract" class="screen">
+    <div class="max-w-lg mx-auto w-full px-5 pt-4 pb-24 md:pt-20 md:pb-12">
+
+        <button onclick="goTo('screen-home')" class="md:hidden mb-4 card w-8 h-8 flex items-center justify-center" style="border-width:2px;">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#3C3C3C" stroke-width="2.5" stroke-linecap="round"><path d="M10 3L5 8L10 13"/></svg>
+        </button>
+
+        <div class="font-display text-2xl font-extrabold mb-5">New Pact</div>
+
+        <!-- Pact Card -->
+        <div class="card p-5 mb-5" style="border-style:dashed; border-color:#006D5B;">
+            <div class="font-mono text-xs text-muted uppercase tracking-[0.2em] mb-3">SMART CONTRACT — DRAFT</div>
+
+            <div class="font-display text-sm font-bold text-ink/40 uppercase tracking-widest mb-2">I promise to...</div>
+            <div class="flex gap-2 mb-3">
+                <input type="text" id="pact-input" class="flex-1 bg-cream border-2 border-ink/10 rounded-xl px-3 py-2.5 font-display text-base font-bold text-ink placeholder:text-ink/30 focus:border-moss focus:outline-none transition-colors" placeholder="Type your promise here..." value="Not order from Wolt this week">
+                <button onclick="addPact()" class="px-4 bg-moss text-white border-2 border-ink rounded-xl font-display text-xs font-bold uppercase tracking-widest hover:bg-moss/90 transition-colors" title="Add pact">Add</button>
+            </div>
+            <div id="pact-display" class="bg-cream border-2 border-moss rounded-xl p-3 mb-4 hidden">
+                <div class="flex items-center justify-between">
+                    <div class="font-display text-base font-bold text-moss" id="pact-text"></div>
+                    <button onclick="clearPact()" class="text-ink/30 hover:text-coral text-lg leading-none">&times;</button>
+                </div>
+            </div>
+
+            <div class="font-mono text-xs text-muted uppercase tracking-[0.15em] mb-2">OR PICK A PRESET</div>
+            <div class="flex flex-wrap gap-2 mb-5">
+                <button onclick="setPact('Not order from Wolt this week')" class="px-3 py-2 bg-cream border-2 border-ink/10 rounded-full font-display text-sm font-semibold text-ink/60 hover:border-moss hover:text-moss transition-colors">No Wolt</button>
+                <button onclick="setPact('Max 2 Espresso House visits')" class="px-3 py-2 bg-cream border-2 border-ink/10 rounded-full font-display text-sm font-semibold text-ink/60 hover:border-moss hover:text-moss transition-colors">Limit fika</button>
+                <button onclick="setPact('No Zalando purchases')" class="px-3 py-2 bg-cream border-2 border-ink/10 rounded-full font-display text-sm font-semibold text-ink/60 hover:border-moss hover:text-moss transition-colors">No Zalando</button>
+                <button onclick="setPact('No alcohol this week')" class="px-3 py-2 bg-cream border-2 border-ink/10 rounded-full font-display text-sm font-semibold text-ink/60 hover:border-moss hover:text-moss transition-colors">No booze</button>
+                <button onclick="setPact('Gym at least 3 times')" class="px-3 py-2 bg-cream border-2 border-ink/10 rounded-full font-display text-sm font-semibold text-ink/60 hover:border-moss hover:text-moss transition-colors">Gym 3x</button>
+            </div>
+
+            <div class="border-t-2 border-dashed border-ink/10 -mx-5 mb-5"></div>
+
+            <!-- Stake -->
+            <div class="text-center mb-3">
+                <div class="font-mono text-xs text-muted uppercase tracking-[0.2em] mb-1">YOUR STAKE</div>
+                <div class="font-display text-4xl font-extrabold" id="stake-display">€30</div>
+            </div>
+            <div class="flex justify-center mb-3">
+                <div class="relative inline-block">
+                    <img src="https://res.cloudinary.com/yevhenii-kalashnyk/image/upload/e_background_removal/c_fill,ar_3:4,g_auto,f_png/v1771693879/Gemini_Generated_Image_3goprg3goprg3gop_l9flik.png" alt="Morkis" class="w-14 h-18 object-contain" id="stake-morkis">
+                    <div class="absolute -top-2 -right-14 card px-2 py-1 text-xs font-display font-bold text-moss whitespace-nowrap" id="morkis-reaction" style="border-width:2px;">Not bad!</div>
+                </div>
+            </div>
+            <input type="range" min="10" max="100" value="30" step="5" id="stake-slider" oninput="updateStake(this.value)">
+            <div class="flex justify-between mt-1">
+                <span class="font-mono text-xs text-muted">€10</span>
+                <span class="font-mono text-xs text-muted">€100</span>
+            </div>
+        </div>
+
+        <!-- Duration -->
+        <div class="mb-5">
+            <div class="font-display text-sm font-bold uppercase tracking-widest mb-3">Duration</div>
+            <div class="flex gap-2">
+                <button class="flex-1 py-3 bg-moss text-white border-2 border-ink rounded-xl font-display text-sm font-bold duration-btn active">7 days</button>
+                <button class="flex-1 py-3 bg-cream text-ink border-2 border-ink/10 rounded-xl font-display text-sm font-bold duration-btn" onclick="selectDuration(this)">14 days</button>
+                <button class="flex-1 py-3 bg-cream text-ink border-2 border-ink/10 rounded-xl font-display text-sm font-bold duration-btn" onclick="selectDuration(this)">30 days</button>
+            </div>
+        </div>
+
+        <!-- Where does your money go? -->
+        <div class="mb-5">
+            <div class="font-display text-sm font-bold uppercase tracking-widest mb-1">If you fail, your money goes to...</div>
+            <div class="font-mono text-xs text-muted mb-3">Pick something you’d hate to fund. That’s the point.</div>
+
+            <div class="font-mono text-xs text-ink/40 uppercase tracking-[0.15em] mb-2 mt-3">NEMESIS OPTIONS</div>
+            <div class="space-y-2 mb-4" id="nemesis-list">
+                <div class="bg-cream border-2 rounded-xl p-3 flex items-center gap-3 cursor-pointer nemesis-option" onclick="selectNemesis(this)" style="border-color:#006D5B; background:#006D5B08;">
+                    <span class="w-8 h-8 bg-bite/10 border-2 border-ink/20 rounded-lg flex items-center justify-center"><i data-lucide="landmark" class="w-4 h-4 text-bite"></i></span>
+                    <div class="flex-1">
+                        <div class="font-display text-base font-bold">The Politician</div>
+                        <div class="font-mono text-xs text-muted">Funds the campaign you despise</div>
+                    </div>
+                    <div class="nemesis-check w-5 h-5 border-2 border-moss rounded-full bg-moss flex items-center justify-center text-white text-[10px] font-black">✓</div>
+                </div>
+                <div class="bg-cream border-2 border-ink/10 rounded-xl p-3 flex items-center gap-3 cursor-pointer nemesis-option" onclick="selectNemesis(this)">
+                    <span class="w-8 h-8 bg-bite/10 border-2 border-ink/20 rounded-lg flex items-center justify-center"><i data-lucide="heart-crack" class="w-4 h-4 text-bite"></i></span>
+                    <div class="flex-1">
+                        <div class="font-display text-base font-bold">The Ex</div>
+                        <div class="font-mono text-xs text-muted">Swish payment with your name on it</div>
+                    </div>
+                    <div class="nemesis-check w-5 h-5 border-2 border-ink/20 rounded-full"></div>
+                </div>
+                <div class="bg-cream border-2 border-ink/10 rounded-xl p-3 flex items-center gap-3 cursor-pointer nemesis-option" onclick="selectNemesis(this)">
+                    <span class="w-8 h-8 bg-bite/10 border-2 border-ink/20 rounded-lg flex items-center justify-center"><i data-lucide="megaphone" class="w-4 h-4 text-bite"></i></span>
+                    <div class="flex-1">
+                        <div class="font-display text-base font-bold">The Influencer</div>
+                        <div class="font-mono text-xs text-muted">Sponsors the most insufferable creator</div>
+                    </div>
+                    <div class="nemesis-check w-5 h-5 border-2 border-ink/20 rounded-full"></div>
+                </div>
+                <div class="bg-cream border-2 border-ink/10 rounded-xl p-3 flex items-center gap-3 cursor-pointer nemesis-option" onclick="selectNemesis(this)">
+                    <span class="w-8 h-8 bg-bite/10 border-2 border-ink/20 rounded-lg flex items-center justify-center"><i data-lucide="flame" class="w-4 h-4 text-bite"></i></span>
+                    <div class="flex-1">
+                        <div class="font-display text-base font-bold">The Anti-Cause</div>
+                        <div class="font-mono text-xs text-muted">Funds an org against your values</div>
+                    </div>
+                    <div class="nemesis-check w-5 h-5 border-2 border-ink/20 rounded-full"></div>
+                </div>
+            </div>
+
+            <div class="font-mono text-xs text-ink/40 uppercase tracking-[0.15em] mb-2">ORGANISATION</div>
+            <div class="space-y-2 mb-4">
+                <div class="bg-cream border-2 border-ink/10 rounded-xl p-3 flex items-center gap-3 cursor-pointer nemesis-option" onclick="selectNemesis(this)">
+                    <span class="w-8 h-8 bg-bite/10 border-2 border-ink/20 rounded-lg flex items-center justify-center"><i data-lucide="building-2" class="w-4 h-4 text-bite"></i></span>
+                    <div class="flex-1">
+                        <div class="font-display text-base font-bold">A lobbying group you hate</div>
+                        <div class="font-mono text-xs text-muted">Donation to their advocacy fund</div>
+                    </div>
+                    <div class="nemesis-check w-5 h-5 border-2 border-ink/20 rounded-full"></div>
+                </div>
+                <div class="bg-cream border-2 border-ink/10 rounded-xl p-3 flex items-center gap-3 cursor-pointer nemesis-option" onclick="selectNemesis(this)">
+                    <span class="w-8 h-8 bg-bite/10 border-2 border-ink/20 rounded-lg flex items-center justify-center"><i data-lucide="globe" class="w-4 h-4 text-bite"></i></span>
+                    <div class="flex-1">
+                        <div class="font-display text-base font-bold">The cause you oppose most</div>
+                        <div class="font-mono text-xs text-muted">Your stake becomes their donation</div>
+                    </div>
+                    <div class="nemesis-check w-5 h-5 border-2 border-ink/20 rounded-full"></div>
+                </div>
+            </div>
+
+            <div class="font-mono text-xs text-ink/40 uppercase tracking-[0.15em] mb-2">PERSONAL</div>
+            <div class="space-y-2">
+                <div class="bg-cream border-2 border-ink/10 rounded-xl p-3 flex items-center gap-3 cursor-pointer nemesis-option" onclick="selectNemesis(this)">
+                    <span class="w-8 h-8 bg-bite/10 border-2 border-ink/20 rounded-lg flex items-center justify-center"><i data-lucide="user-x" class="w-4 h-4 text-bite"></i></span>
+                    <div class="flex-1">
+                        <div class="font-display text-base font-bold">Someone specific</div>
+                        <div class="font-mono text-xs text-muted">They get a Swish payment with your name on it</div>
+                    </div>
+                    <div class="nemesis-check w-5 h-5 border-2 border-ink/20 rounded-full"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sign -->
+        <button onclick="signPact()" class="btn w-full px-6 py-4 bg-moss text-white text-base uppercase tracking-widest">
+            <i data-lucide="pen-line" class="w-4 h-4 inline mr-1"></i> Sign the Pact
+        </button>
+        <p class="font-mono text-xs text-muted text-center mt-2 mb-4">By signing, you agree Morkis owns your dignity.</p>
+    </div>
+</div>
+
+<!-- ================================ -->
+<!-- SCREEN: GROUP PACT               -->
+<!-- ================================ -->
+<div id="screen-group" class="screen">
+    <div class="max-w-lg mx-auto w-full px-5 pt-4 pb-24 md:pt-20 md:pb-12">
+
+        <button onclick="goTo('screen-home')" class="md:hidden mb-4 card w-8 h-8 flex items-center justify-center" style="border-width:2px;">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#3C3C3C" stroke-width="2.5" stroke-linecap="round"><path d="M10 3L5 8L10 13"/></svg>
+        </button>
+
+        <div class="font-display text-2xl font-extrabold mb-1">Group Pact</div>
+        <div class="font-body text-base text-muted mb-5">Mutual Assured Destruction</div>
+
+        <p class="font-body text-base text-ink/50 mb-5">One person fails, <span class="text-ink font-semibold">everyone loses.</span></p>
+
+        <!-- The Pact -->
+        <div class="card p-4 mb-4" style="border-color:#006D5B;">
+            <div class="font-mono text-xs text-muted uppercase tracking-[0.2em] mb-2">GROUP CONTRACT</div>
+            <div class="font-display text-lg font-bold">“No fast fashion this month”</div>
+            <div class="font-body text-sm text-muted mt-1">30 days · Ends Feb 28</div>
+        </div>
+
+        <!-- Pool -->
+        <div class="card p-4 mb-4 text-center" style="border-color:#006D5B;">
+            <div class="font-mono text-xs text-muted uppercase tracking-[0.2em] mb-1">TOTAL STAKE POOL</div>
+            <div class="font-display text-4xl font-extrabold text-moss">€200</div>
+            <div class="font-body text-sm text-muted mt-1">4 people × €50</div>
+        </div>
+
+        <!-- Participants -->
+        <div class="mb-4">
+            <div class="font-display text-sm font-bold uppercase tracking-widest mb-3">Participants</div>
+            <div class="grid grid-cols-2 gap-2">
+                <div class="bg-cream border-2 border-ink/10 rounded-xl p-3 text-center">
+                    <div class="w-10 h-10 bg-ink/5 border-2 border-ink/20 rounded-full flex items-center justify-center mx-auto mb-1 overflow-hidden">
+                        <img src="https://res.cloudinary.com/yevhenii-kalashnyk/image/upload/e_background_removal/c_fill,ar_3:4,g_auto,f_png/v1771693879/Gemini_Generated_Image_3goprg3goprg3gop_l9flik.png" alt="" class="w-6 h-8 object-contain">
+                    </div>
+                    <div class="font-display text-sm font-bold">You</div>
+                    <div class="font-mono text-xs text-moss font-bold">88%</div>
+                </div>
+                <div class="bg-cream border-2 border-ink/10 rounded-xl p-3 text-center">
+                    <div class="w-10 h-10 bg-ink/5 border-2 border-ink/20 rounded-full flex items-center justify-center mx-auto mb-1"><i data-lucide="user" class="w-5 h-5 text-ink/40"></i></div>
+                    <div class="font-display text-sm font-bold">Sara</div>
+                    <div class="font-mono text-xs text-coral font-bold">60% <i data-lucide="alert-triangle" class="w-3 h-3 inline text-coral"></i></div>
+                </div>
+                <div class="bg-cream border-2 border-ink/10 rounded-xl p-3 text-center">
+                    <div class="w-10 h-10 bg-ink/5 border-2 border-ink/20 rounded-full flex items-center justify-center mx-auto mb-1"><i data-lucide="user" class="w-5 h-5 text-ink/40"></i></div>
+                    <div class="font-display text-sm font-bold">Erik</div>
+                    <div class="font-mono text-xs text-ink/50 font-bold">72%</div>
+                </div>
+                <div class="bg-cream border-2 border-ink/10 rounded-xl p-3 text-center">
+                    <div class="w-10 h-10 bg-ink/5 border-2 border-ink/20 rounded-full flex items-center justify-center mx-auto mb-1"><i data-lucide="user" class="w-5 h-5 text-ink/40"></i></div>
+                    <div class="font-display text-sm font-bold">Dave</div>
+                    <div class="font-mono text-xs text-moss font-bold">92%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Warning -->
+        <div class="flex items-start gap-3 p-3 mb-5 rounded-xl" style="background:#FF4B4B10;">
+            <i data-lucide="alert-triangle" class="w-5 h-5 text-coral shrink-0 mt-0.5"></i>
+            <div>
+                <div class="font-display text-sm font-bold text-coral">Sara’s integrity score is only 60%.</div>
+                <div class="font-body text-sm text-ink/50 mt-0.5">If she fails, you all lose €50. Trust her?</div>
+            </div>
+        </div>
+
+        <button onclick="goTo('screen-home')" class="btn w-full px-6 py-4 bg-coral text-white text-base uppercase tracking-widest">
+            <i data-lucide="skull" class="w-4 h-4 inline mr-1"></i> Seal the Blood Pact
+        </button>
+        <p class="font-mono text-xs text-muted text-center mt-2 mb-4">No backing out. Friendships may be casualties.</p>
+    </div>
+</div>
+
+<!-- ================================ -->
+<!-- SCREEN: THE BITE (LOSS)          -->
+<!-- ================================ -->
+<div id="screen-bite" class="screen">
+    <div class="max-w-lg mx-auto w-full px-5 pt-8 pb-24 md:pt-24 md:pb-12 flex flex-col items-center">
+
+        <img src="https://res.cloudinary.com/yevhenii-kalashnyk/image/upload/e_background_removal/c_fill,ar_3:4,g_auto,f_png/v1771693879/Gemini_Generated_Image_3goprg3goprg3gop_l9flik.png" alt="Morkis" class="w-28 h-36 object-contain mb-4 drop-shadow-[0_4px_12px_rgba(255,107,107,0.3)]">
+
+        <div class="font-display text-lg font-extrabold text-coral uppercase tracking-[0.2em] mb-1">MORKIS HAS BITTEN</div>
+        <div class="font-body text-base text-muted mb-4">You broke your word. Here’s what happened:</div>
+
+        <!-- How it works explanation -->
+        <div class="w-full p-4 mb-4 rounded-xl" style="background:#FF4B4B08;">
+            <div class="font-display text-sm font-bold text-coral uppercase tracking-widest mb-2"><i data-lucide="search" class="w-4 h-4 inline mr-1 text-coral"></i>How we caught you</div>
+            <div class="space-y-2">
+                <div class="flex items-start gap-2">
+                    <div class="w-6 h-6 bg-coral/10 border-2 border-coral/30 rounded-full flex items-center justify-center text-xs font-bold text-coral shrink-0 mt-0.5">1</div>
+                    <div class="font-body text-sm text-ink/60"><strong class="text-ink/80">Tink Open Banking</strong> monitors your transactions in real-time via your bank connection.</div>
+                </div>
+                <div class="flex items-start gap-2">
+                    <div class="w-6 h-6 bg-coral/10 border-2 border-coral/30 rounded-full flex items-center justify-center text-xs font-bold text-coral shrink-0 mt-0.5">2</div>
+                    <div class="font-body text-sm text-ink/60">It detected a <strong class="text-ink/80">Wolt payment of €34.90</strong> — matching your “No Wolt” pact.</div>
+                </div>
+                <div class="flex items-start gap-2">
+                    <div class="w-6 h-6 bg-coral/10 border-2 border-coral/30 rounded-full flex items-center justify-center text-xs font-bold text-coral shrink-0 mt-0.5">3</div>
+                    <div class="font-body text-sm text-ink/60"><strong class="text-ink/80">Stripe</strong> automatically transferred your €30 stake to your chosen nemesis: <span class="text-coral font-bold">The Politician.</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Receipt -->
+        <div class="w-full card p-5 mb-5" style="border-style:dashed;">
+            <div class="font-mono text-xs text-muted uppercase tracking-[0.2em] mb-3">BITE RECEIPT — #MK-4491</div>
+            <div class="font-display text-4xl font-extrabold text-coral text-center mb-1">€30.00</div>
+            <div class="font-body text-base text-muted text-center mb-4">captured & transferred via Stripe</div>
+            <div class="border-t-2 border-dashed border-ink/10 pt-3 space-y-2">
+                <div class="flex justify-between"><span class="font-mono text-xs text-muted uppercase">Pact</span><span class="font-display text-sm font-bold">No Wolt this week</span></div>
+                <div class="flex justify-between"><span class="font-mono text-xs text-muted uppercase">Broken</span><span class="font-display text-sm font-bold text-coral">Thu 01:47 AM</span></div>
+                <div class="flex justify-between"><span class="font-mono text-xs text-muted uppercase">Trigger</span><span class="font-display text-sm font-bold">Wolt — €34.90</span></div>
+                <div class="flex justify-between"><span class="font-mono text-xs text-muted uppercase">Detected by</span><span class="font-display text-sm font-bold">Tink Open Banking</span></div>
+                <div class="flex justify-between"><span class="font-mono text-xs text-muted uppercase">Sent to</span><span class="font-display text-sm font-bold text-coral">The Politician</span></div>
+                <div class="flex justify-between"><span class="font-mono text-xs text-muted uppercase">Via</span><span class="font-display text-sm font-bold">Stripe Connect</span></div>
+            </div>
+        </div>
+
+        <!-- Roast -->
+        <div class="w-full p-4 mb-5 rounded-xl" style="background:#FF4B4B08;">
+            <div class="font-display text-sm font-bold text-coral uppercase tracking-widest mb-2">Your Roast</div>
+            <div class="bg-cream border-2 border-ink/5 rounded-xl p-3">
+                <p class="font-display text-sm font-semibold text-ink/70 italic leading-relaxed">
+                    "Oh look, Erik ordered Wolt at 1:47 AM. On a Thursday. The Politician just got <span class="text-coral font-extrabold not-italic">€30 richer.</span> Sweet dreams."
+                </p>
+            </div>
+        </div>
+
+        <div class="w-full grid grid-cols-2 gap-3 mb-5">
+            <div class="p-3 text-center"><div class="font-display text-xl font-extrabold text-coral">-180</div><div class="font-mono text-xs text-muted uppercase">IP Lost</div></div>
+            <div class="p-3 text-center"><div class="font-display text-xl font-extrabold text-coral"><i data-lucide="heart-off" class="w-5 h-5 text-coral mx-auto"></i></div><div class="font-mono text-xs text-muted uppercase">Streak Broken</div></div>
+        </div>
+
+        <button onclick="goTo('screen-home')" class="btn w-full px-6 py-4 bg-ink text-white text-base uppercase tracking-widest">
+            I Accept My Shame
+        </button>
+    </div>
+</div>
+
+<!-- ================================ -->
+<!-- SCREEN: MONSTER SHOP             -->
+<!-- ================================ -->
+<div id="screen-shop" class="screen">
+    <div class="max-w-2xl mx-auto w-full px-5 pt-4 pb-24 md:pt-20 md:pb-12">
+
+        <button onclick="goTo('screen-home')" class="md:hidden mb-4 card w-8 h-8 flex items-center justify-center" style="border-width:2px;">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#3C3C3C" stroke-width="2.5" stroke-linecap="round"><path d="M10 3L5 8L10 13"/></svg>
+        </button>
+
+        <div class="flex items-center justify-between mb-5">
+            <div class="font-display text-2xl font-extrabold">Monster Shop</div>
+            <div class="card px-3 py-1 font-display text-sm font-extrabold text-moss" style="border-width:2px;">2,340 IP</div>
+        </div>
+
+        <p class="font-body text-base text-muted mb-5">Prove you’re disciplined enough to dress your monster.</p>
+
+        <!-- Current Morkis -->
+        <div class="card p-6 mb-5 text-center" style="background:linear-gradient(180deg,#D0ECE6,#E0F5F0);">
+            <div class="float inline-block relative">
+                <img src="https://res.cloudinary.com/yevhenii-kalashnyk/image/upload/e_background_removal/c_fill,ar_3:4,g_auto,f_png/v1771693879/Gemini_Generated_Image_3goprg3goprg3gop_l9flik.png" alt="Morkis" class="w-24 object-contain mx-auto">
+                <div class="absolute -top-4 left-1/2 -translate-x-1/2"><i data-lucide="crown" class="w-6 h-6 text-sunshine"></i></div>
+            </div>
+            <div class="mt-2 font-display text-sm font-bold text-moss">YOUR MORKIS — LVL 12</div>
+        </div>
+
+        <!-- Items -->
+        <div class="font-display text-sm font-bold uppercase tracking-widest mb-3">Cosmetics</div>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <div class="card p-4 text-center" style="border-color:#006D5B;">
+                <div class="text-2xl mb-2"><i data-lucide="crown" class="w-6 h-6 text-sunshine mx-auto"></i></div>
+                <div class="font-display text-sm font-bold">Tiny Crown</div>
+                <div class="mt-1.5 px-2 py-0.5 bg-moss/10 rounded-full font-mono text-xs text-moss font-bold inline-block">OWNED ✓</div>
+            </div>
+            <div class="card p-4 text-center card-hover cursor-pointer">
+                <div class="text-2xl mb-2"><i data-lucide="sparkles" class="w-6 h-6 text-sunshine mx-auto"></i></div>
+                <div class="font-display text-sm font-bold">Golden Tooth</div>
+                <div class="mt-1.5 px-2 py-0.5 bg-sunshine/20 rounded-full font-mono text-xs text-ink/60 font-bold inline-block">800 IP</div>
+            </div>
+            <div class="card p-4 text-center card-hover cursor-pointer">
+                <div class="text-2xl mb-2"><i data-lucide="wind" class="w-6 h-6 text-chill mx-auto"></i></div>
+                <div class="font-display text-sm font-bold">Nordic Scarf</div>
+                <div class="mt-1.5 px-2 py-0.5 bg-sunshine/20 rounded-full font-mono text-xs text-ink/60 font-bold inline-block">500 IP</div>
+            </div>
+            <div class="card p-4 text-center opacity-50">
+                <div class="text-2xl mb-2"><i data-lucide="flame" class="w-6 h-6 text-coral mx-auto"></i></div>
+                <div class="font-display text-sm font-bold">Flame Aura</div>
+                <div class="mt-1.5 px-2 py-0.5 bg-coral/10 rounded-full font-mono text-xs text-coral font-bold inline-block">3,000 IP</div>
+            </div>
+            <div class="card p-4 text-center opacity-50">
+                <div class="text-2xl mb-2"><i data-lucide="graduation-cap" class="w-6 h-6 text-ink/40 mx-auto"></i></div>
+                <div class="font-display text-sm font-bold">Top Hat</div>
+                <div class="mt-1.5 px-2 py-0.5 bg-coral/10 rounded-full font-mono text-xs text-coral font-bold inline-block">5,000 IP</div>
+            </div>
+            <div class="card p-4 text-center opacity-50">
+                <div class="text-2xl mb-2"><i data-lucide="gem" class="w-6 h-6 text-ink/40 mx-auto"></i></div>
+                <div class="font-display text-sm font-bold">Diamond Eyes</div>
+                <div class="mt-1.5 px-2 py-0.5 bg-coral/10 rounded-full font-mono text-xs text-coral font-bold inline-block">10,000 IP</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentScreen = 'screen-home';
+    let failureRoastAudio = null;
+    let failureRoastUrl = null;
+    let failureRoastLoading = false;
+
+    function goTo(id) {
+        document.getElementById(currentScreen)?.classList.remove('active');
+        document.getElementById(id)?.classList.add('active');
+        window.scrollTo(0, 0);
+        currentScreen = id;
+
+        // Update desktop nav highlights
+        document.querySelectorAll('.nav-link').forEach(l => {
+            if (l.dataset.screen === id) {
+                l.classList.remove('text-ink/50');
+                l.classList.add('text-moss');
+            } else {
+                l.classList.remove('text-moss');
+                l.classList.add('text-ink/50');
+            }
+        });
+
+        // Update mobile tab highlights
+        document.querySelectorAll('.tab').forEach(t => {
+            t.classList.toggle('active', t.dataset.screen === id);
+        });
+
+        // Show/hide mobile tabs on all main screens
+        const showTabs = ['screen-home','screen-contract','screen-group','screen-shop','screen-bite'];
+        document.getElementById('mobile-tabs').style.display = showTabs.includes(id) ? 'flex' : 'none';
+
+        if (id === 'screen-bite') {
+            playFailureRoast(true);
+        }
+    }
+
+    function setFailureRoastStatus(message) {
+        const statusEl = document.getElementById('failure-roast-status');
+        if (statusEl) statusEl.textContent = message;
+    }
+
+    function setFailureRoastButton(message, disabled = false) {
+        const btn = document.getElementById('failure-roast-btn');
+        if (!btn) return;
+        btn.disabled = disabled;
+        btn.innerHTML = `<i data-lucide="volume-2" class="w-4 h-4 inline mr-1"></i> ${message}`;
+        lucide.createIcons();
+    }
+
+    async function playFailureRoast(auto = false) {
+        if (failureRoastLoading) return;
+        failureRoastLoading = true;
+        setFailureRoastButton('Loading Roast...', true);
+        setFailureRoastStatus('Contacting ElevenLabs...');
+
+        try {
+            if (failureRoastAudio) {
+                failureRoastAudio.pause();
+                failureRoastAudio.currentTime = 0;
+            }
+            if (failureRoastUrl) {
+                URL.revokeObjectURL(failureRoastUrl);
+                failureRoastUrl = null;
+            }
+
+            const response = await fetch('/api/failure-roast', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_name: 'Erik',
+                    failed_goal: 'No Wolt this week',
+                    amount: '€30'
+                })
+            });
+
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                throw new Error(err.error || err.detail || 'Failed to generate roast');
+            }
+
+            const blob = await response.blob();
+            failureRoastUrl = URL.createObjectURL(blob);
+            failureRoastAudio = new Audio(failureRoastUrl);
+            await failureRoastAudio.play();
+            setFailureRoastStatus('Now playing');
+            setFailureRoastButton('Replay AI Roast');
+        } catch (error) {
+            setFailureRoastStatus(`Voice unavailable: ${error.message}`);
+            setFailureRoastButton('Play AI Roast');
+            if (!auto) {
+                console.error(error);
+            }
+        } finally {
+            failureRoastLoading = false;
+        }
+    }
+
+    function updateStake(v) {
+        document.getElementById('stake-display').textContent = '€' + v;
+        const m = document.getElementById('stake-morkis');
+        const r = document.getElementById('morkis-reaction');
+        m.classList.add('wiggle');
+        setTimeout(() => m.classList.remove('wiggle'), 500);
+        if (v <= 20) { r.textContent = 'That all?'; r.style.color = '#AFAFAF'; }
+        else if (v <= 40) { r.textContent = 'Not bad!'; r.style.color = '#006D5B'; }
+        else if (v <= 70) { r.textContent = 'Now we\'re talking!'; r.style.color = '#006D5B'; }
+        else { r.textContent = 'BRAVE!'; r.style.color = '#FF4B4B'; }
+    }
+
+    function setPact(t) {
+        document.getElementById('pact-input').value = t;
+        addPact();
+    }
+
+    function addPact() {
+        const input = document.getElementById('pact-input');
+        const text = input.value.trim();
+        if (!text) { input.focus(); return; }
+        document.getElementById('pact-text').textContent = text;
+        document.getElementById('pact-display').classList.remove('hidden');
+        input.style.borderColor = '#006D5B';
+    }
+
+    function signPact() {
+        const input = document.getElementById('pact-input');
+        const text = input.value.trim();
+        if (!text) { input.focus(); return; }
+
+        const stake = document.getElementById('stake-slider').value;
+        let duration = '7 days';
+        document.querySelectorAll('.duration-btn').forEach(b => {
+            if (b.style.background === 'rgb(0, 109, 91)' || b.classList.contains('active') && b.style.background !== 'rgb(248, 246, 240)') {
+                duration = b.textContent.trim();
+            }
+        });
+        const durationDays = parseInt(duration);
+
+        // Find selected nemesis
+        let nemesis = 'Unknown';
+        document.querySelectorAll('.nemesis-option').forEach(o => {
+            if (o.style.borderColor === 'rgb(0, 109, 91)') {
+                nemesis = o.querySelector('.font-display')?.textContent || 'Unknown';
+            }
+        });
+
+        // Pick a Lucide icon based on pact text
+        let iconName = 'sparkles';
+        const lower = text.toLowerCase();
+        if (lower.includes('wolt') || lower.includes('food') || lower.includes('pizza')) iconName = 'utensils';
+        else if (lower.includes('fika') || lower.includes('coffee') || lower.includes('espresso')) iconName = 'coffee';
+        else if (lower.includes('zalando') || lower.includes('shop')) iconName = 'shopping-bag';
+        else if (lower.includes('alcohol') || lower.includes('booze') || lower.includes('beer') || lower.includes('drink')) iconName = 'beer';
+        else if (lower.includes('gym') || lower.includes('exercise') || lower.includes('workout')) iconName = 'dumbbell';
+
+        // Create the new pact card
+        const pactCard = document.createElement('div');
+        pactCard.className = 'card p-4';
+        pactCard.style.borderColor = '#006D5B';
+        pactCard.innerHTML = `
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-moss/10 border-2 border-moss rounded-lg flex items-center justify-center"><i data-lucide="${iconName}" class="w-5 h-5 text-moss"></i></div>
+                    <div>
+                        <div class="font-display text-base font-bold">${text}</div>
+                        <div class="font-mono text-xs text-muted">${durationDays} days remaining</div>
+                    </div>
+                </div>
+                <div class="font-display text-base font-extrabold text-moss">€${stake}</div>
+            </div>
+            <div class="w-full h-3 bg-cream border-2 border-ink/10 rounded-full overflow-hidden">
+                <div class="h-full bg-moss rounded-full" style="width:5%"></div>
+            </div>
+            <div class="flex justify-between mt-1.5">
+                <span class="font-mono text-xs text-muted">Day 1/${durationDays}</span>
+                <span class="font-mono text-xs text-moss font-bold">Just started ✓</span>
+            </div>
+            <div class="font-mono text-xs text-muted mt-2">➜ ${nemesis}</div>
+        `;
+
+        // Insert at top of pact list
+        const pactList = document.getElementById('pact-list');
+        pactList.insertBefore(pactCard, pactList.firstChild);
+        lucide.createIcons();
+
+        // Reset the form
+        input.value = '';
+        input.style.borderColor = '';
+        document.getElementById('pact-display').classList.add('hidden');
+        document.getElementById('stake-slider').value = 30;
+        document.getElementById('stake-display').textContent = '€30';
+
+        // Navigate to home
+        goTo('screen-home');
+    }
+
+    function clearPact() {
+        document.getElementById('pact-display').classList.add('hidden');
+        document.getElementById('pact-input').value = '';
+        document.getElementById('pact-input').style.borderColor = '';
+        document.getElementById('pact-input').focus();
+    }
+
+    // Allow Enter key in pact input
+    document.getElementById('pact-input')?.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); addPact(); }
+    });
+
+    function selectDuration(btn) {
+        document.querySelectorAll('.duration-btn').forEach(b => {
+            b.style.background = '#F7F7F7'; b.style.color = '#3C3C3C'; b.style.borderColor = 'rgba(60,60,60,0.1)';
+        });
+        btn.style.background = '#006D5B'; btn.style.color = 'white'; btn.style.borderColor = '#006D5B';
+    }
+
+    function selectNemesis(el) {
+        document.querySelectorAll('.nemesis-option').forEach(o => {
+            o.style.borderColor = 'rgba(60,60,60,0.1)'; o.style.background = '#F7F7F7';
+            const r = o.querySelector('.nemesis-check');
+            if (r) { r.style.borderColor = 'rgba(30,30,30,0.2)'; r.style.background = 'transparent'; r.textContent = ''; r.style.color = 'transparent'; r.style.fontSize = '0'; }
+        });
+        el.style.borderColor = '#006D5B'; el.style.background = '#006D5B08';
+        const r = el.querySelector('.nemesis-check');
+        if (r) { r.style.borderColor = '#006D5B'; r.style.background = '#006D5B'; r.textContent = '\u2713'; r.style.color = 'white'; r.style.fontSize = '10px'; r.style.fontWeight = '900'; }
+    }
+
+    // Init: mark home as active in desktop nav
+    document.querySelector('.nav-link[data-screen="screen-home"]')?.classList.add('text-moss');
+
+    // Init Lucide icons
+    lucide.createIcons();
+</script>
+</body>
+</html>

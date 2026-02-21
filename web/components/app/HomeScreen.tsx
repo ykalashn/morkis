@@ -1,4 +1,4 @@
-import { AlertTriangle, Coins, Coffee, Utensils } from "lucide-react";
+import { AlertTriangle, Coffee, Users, Utensils } from "lucide-react";
 import type { Pact } from "@/types/domain";
 
 const MONSTER_IMAGE =
@@ -34,20 +34,13 @@ export function HomeScreen({ pacts, onOpenContract, onOpenGroup, onTriggerFailur
         <div className="hidden items-center justify-between md:flex">
           <div>
             <p className="font-[var(--font-display)] text-4xl font-extrabold">Hey, Erik</p>
-            <p className="text-base text-muted">Day 12 of being honest · 2,340 Integrity Points</p>
+            <p className="text-base text-muted">Day 12 of being honest</p>
           </div>
         </div>
 
-        <div className="morkis-card relative overflow-hidden border-moss bg-gradient-to-b from-[#D0ECE6] to-[#E0F5F0] p-6 text-center">
-          <span className="absolute right-4 top-4 h-8 w-8 rounded-full bg-yellow-300/60" />
+        <div className="morkis-card border-moss p-6 text-center">
           <img src={MONSTER_IMAGE} alt="Morkis" className="mx-auto w-24 md:w-32" />
-          <div className="mt-2 flex items-center justify-center gap-1">
-            <Coins className="h-5 w-5 text-yellow-500" />
-            <Coins className="h-5 w-5 text-yellow-500" />
-            <Coins className="h-5 w-5 text-yellow-500" />
-          </div>
           <p className="mt-1 font-[var(--font-display)] text-lg font-extrabold text-moss">€340 saved by fear</p>
-          <p className="text-sm text-muted">Lifetime total you did not waste</p>
         </div>
 
         <div>
@@ -155,7 +148,12 @@ export function HomeScreen({ pacts, onOpenContract, onOpenGroup, onTriggerFailur
           <button type="button" onClick={onOpenContract} className="morkis-button bg-moss px-3 py-3 text-sm uppercase tracking-widest text-white">
             + New Pact
           </button>
-          <button type="button" onClick={onOpenGroup} className="morkis-button bg-[#CE82FF] px-3 py-3 text-sm uppercase tracking-widest text-ink">
+          <button
+            type="button"
+            onClick={onOpenGroup}
+            className="morkis-button border-2 border-ink/10 bg-cream px-3 py-3 text-sm uppercase tracking-widest text-ink"
+          >
+            <Users className="mr-1 inline h-4 w-4" />
             Group
           </button>
         </div>

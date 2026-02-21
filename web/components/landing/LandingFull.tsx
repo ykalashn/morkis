@@ -18,7 +18,8 @@ import {
   ShoppingCart,
   Store,
   Utensils,
-  UtensilsCrossed
+  UtensilsCrossed,
+  X
 } from "lucide-react";
 
 const MONSTER_IMAGE =
@@ -108,6 +109,9 @@ function Waveform() {
 
 export function LandingFull() {
   const [captureVisible, setCaptureVisible] = useState(false);
+  const [waitlistOpen, setWaitlistOpen] = useState(false);
+  const [waitlistSubmitted, setWaitlistSubmitted] = useState(false);
+  const [email, setEmail] = useState("");
 
   return (
     <main className="bg-white text-ink">
@@ -124,7 +128,7 @@ export function LandingFull() {
             <a href="#roast">Roast</a>
           </div>
           <Link href="/app" className="morkis-button bg-moss px-6 py-2.5 text-sm tracking-wide text-white">
-            Stake Now
+            TRY THE APP
           </Link>
         </div>
       </nav>
@@ -139,12 +143,24 @@ export function LandingFull() {
               Morkis is the AI that monitors your bank feed and <span className="font-semibold text-coral">eats your money</span> if
               you break your word. Powered by loss aversion.
             </p>
-            <Link
-              href="/app"
-              className="morkis-button mt-8 inline-block bg-moss px-8 py-4 text-sm uppercase tracking-[0.2em] text-white"
-            >
-              Make A Promise
-            </Link>
+            <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row md:items-start">
+              <Link
+                href="/app"
+                className="morkis-button inline-block bg-moss px-8 py-4 text-sm uppercase tracking-[0.2em] text-white"
+              >
+                TRY THE APP
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  setWaitlistSubmitted(false);
+                  setWaitlistOpen(true);
+                }}
+                className="morkis-button border-2 border-ink/10 bg-cream px-8 py-4 text-sm uppercase tracking-[0.2em] text-ink"
+              >
+                JOIN THE WAITLIST
+              </button>
+            </div>
           </div>
           <div className="flex justify-center">
             <img src={MONSTER_IMAGE} alt="Morkis Monster" className="w-[340px] max-w-full" />
@@ -453,10 +469,90 @@ export function LandingFull() {
             href="/app"
             className="morkis-button mt-8 inline-block bg-moss px-12 py-5 text-lg uppercase tracking-[0.2em] text-white"
           >
-            Face The Monster
+            TRY THE APP
           </Link>
+          <div className="mt-4">
+            <button
+              type="button"
+              onClick={() => {
+                setWaitlistSubmitted(false);
+                setWaitlistOpen(true);
+              }}
+              className="morkis-button border-2 border-ink/10 bg-cream px-10 py-4 text-base uppercase tracking-[0.2em] text-ink"
+            >
+              JOIN THE WAITLIST
+            </button>
+          </div>
+          <p className="mt-6 font-[var(--font-display)] text-xs font-bold uppercase tracking-widest text-ink/40">
+            Be the first to know when Morkis launches.
+          </p>
         </div>
       </section>
+
+      {waitlistOpen ? (
+        <div className="fixed inset-0 z-[100]">
+          <button
+            type="button"
+            aria-label="Close waitlist"
+            className="absolute inset-0 h-full w-full bg-ink/40 backdrop-blur-sm"
+            onClick={() => setWaitlistOpen(false)}
+          />
+          <div className="absolute left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2">
+            <div className="relative rounded-2xl border-2 border-ink/10 bg-white p-8">
+              <button
+                type="button"
+                aria-label="Close"
+                onClick={() => setWaitlistOpen(false)}
+                className="absolute right-4 top-4 text-ink/30 hover:text-ink"
+              >
+                <X className="h-5 w-5" />
+              </button>
+
+              {!waitlistSubmitted ? (
+                <>
+                  <div className="mb-6 text-center">
+                    <img src={MONSTER_IMAGE} alt="Morkis" className="mx-auto mb-4 h-20 w-16 object-contain" />
+                    <h3 className="font-[var(--font-display)] text-2xl font-extrabold text-ink">Join the Waitlist</h3>
+                    <p className="mt-2 text-sm text-ink/50">
+                      Morkis is currently in prototype stage. Sign up and we&apos;ll keep you informed on all future progress.
+                    </p>
+                  </div>
+
+                  <form
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      setWaitlistSubmitted(true);
+                    }}
+                    className="space-y-4"
+                  >
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
+                      className="w-full rounded-xl border-2 border-ink/10 bg-cream px-4 py-3 text-base text-ink placeholder:text-ink/30 outline-none focus:border-moss"
+                      placeholder="your@email.com"
+                    />
+                    <button type="submit" className="morkis-button w-full bg-moss px-6 py-4 text-sm uppercase tracking-widest text-white">
+                      Sign Me Up
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <div className="py-6 text-center">
+                  <img src={MONSTER_IMAGE} alt="Morkis" className="mx-auto mb-4 h-20 w-16 object-contain" />
+                  <p className="font-[var(--font-display)] text-2xl font-extrabold text-moss">You&apos;re on the list!</p>
+                  <p className="mt-2 text-sm text-ink/50">We&apos;ll be in touch when Morkis is ready to bite.</p>
+                </div>
+              )}
+
+              <p className="mt-4 text-center font-[var(--font-mono)] text-[10px] leading-relaxed text-ink/30">
+                We respect your privacy. Your email will only be used to send updates about Morkis. You can unsubscribe at any time.
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <footer className="border-t border-ink/10 px-6 py-10">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-5 md:flex-row">

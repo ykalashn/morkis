@@ -146,7 +146,7 @@ export function ContractScreen({ onCreate }: ContractScreenProps) {
         onClick={() => onCreate({ title, stakeEuro: stake })}
         className="morkis-button w-full bg-moss px-6 py-4 text-base uppercase tracking-widest text-white"
       >
-        Sign The Pact
+        Sign the Pact
       </button>
       <p className="text-center font-[var(--font-mono)] text-xs text-muted">By signing, you agree Morkis owns your dignity.</p>
     </section>
