@@ -163,7 +163,7 @@
         <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <img src="https://res.cloudinary.com/yevhenii-kalashnyk/image/upload/e_background_removal/c_fill,ar_3:4,g_auto,f_png/v1771693879/Gemini_Generated_Image_3goprg3goprg3gop_l9flik.png" alt="Morkis" class="w-8 h-10 object-contain">
-                <span class="font-display text-xl font-800 tracking-wide">MORKIS</span>
+                <span class="font-display text-xl tracking-wide">MORKIS</span>
             </div>
             <div class="hidden md:flex items-center gap-8 font-display text-sm font-600 text-ink/60">
                 <a href="#nemesis" class="hover:text-pop transition-colors duration-300">Nemesis Fund</a>
@@ -172,7 +172,7 @@
                 <a href="#roast" class="hover:text-pop transition-colors duration-300">Roast</a>
             </div>
             <a href="app.html" class="btn-fun px-6 py-2.5 bg-pop text-white text-sm tracking-wide inline-block no-underline">
-                STAKE NOW
+                TRY THE APP
             </a>
         </div>
     </nav>
@@ -192,8 +192,11 @@
                 </p>
                 <div class="flex flex-col sm:flex-row gap-4 items-center md:items-start justify-center md:justify-start">
                     <a href="app.html" class="btn-fun px-8 py-4 bg-pop text-white text-sm uppercase tracking-widest inline-block no-underline text-center">
-                        MAKE A PROMISE
+                        TRY THE APP
                     </a>
+                    <button onclick="openWaitlist()" class="btn-fun px-8 py-4 bg-cream text-ink border-2 border-ink/10 text-sm uppercase tracking-widest">
+                        JOIN THE WAITLIST
+                    </button>
                 </div>
             </div>
 
@@ -205,11 +208,7 @@
             </div>
         </div>
 
-        <!-- Scroll indicator (desktop only) -->
-        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 hidden md:flex flex-col items-center gap-2 text-ink/40">
-            <span class="font-display text-xs font-600 uppercase tracking-[0.3em]">Scroll</span>
-            <div class="w-0.5 h-8 bg-gradient-to-b from-ink/30 to-transparent animate-pulse"></div>
-        </div>
+
     </section>
 
     <!-- SECTION 2: NEMESIS FUND -->
@@ -713,13 +712,54 @@
                 If your bank data proves you lied, the monster eats your deposit and sends it to your worst enemy.
             </p>
             <a href="app.html" class="btn-fun px-12 py-5 bg-pop text-white text-lg uppercase tracking-widest inline-block no-underline">
-                FACE THE MONSTER
+                TRY THE APP
             </a>
+            <div class="mt-4">
+                <button onclick="openWaitlist()" class="btn-fun px-10 py-4 bg-cream text-ink border-2 border-ink/10 text-base uppercase tracking-widest">
+                    JOIN THE WAITLIST
+                </button>
+            </div>
             <div class="mt-6 font-display text-xs font-700 text-ink/40 uppercase tracking-widest">
-                No escape. No refunds. No mercy.
+                Be the first to know when Morkis launches.
             </div>
         </div>
     </section>
+
+
+    <!-- WAITLIST MODAL -->
+    <div id="waitlist-modal" class="fixed inset-0 z-[100] hidden">
+        <div class="absolute inset-0 bg-ink/40 backdrop-blur-sm" onclick="closeWaitlist()"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md mx-4">
+            <div class="bg-white rounded-2xl border-2 border-ink/10 p-8 relative">
+                <button onclick="closeWaitlist()" class="absolute top-4 right-4 text-ink/30 hover:text-ink text-xl leading-none">&times;</button>
+                
+                <div class="text-center mb-6">
+                    <img src="https://res.cloudinary.com/yevhenii-kalashnyk/image/upload/e_background_removal/c_fill,ar_3:4,g_auto,f_png/v1771693879/Gemini_Generated_Image_3goprg3goprg3gop_l9flik.png" alt="Morkis" class="w-16 h-20 object-contain mx-auto mb-4">
+                    <h3 class="font-display text-2xl font-800 text-ink mb-2">Join the Waitlist</h3>
+                    <p class="font-body text-sm text-ink/50">Morkis is currently in prototype stage. Sign up and we'll keep you informed on all future progress.</p>
+                </div>
+
+                <form id="waitlist-form" name="waitlist" method="POST" data-netlify="true" onsubmit="submitWaitlist(event)">
+                    <input type="hidden" name="form-name" value="waitlist">
+                    <input type="email" id="waitlist-email" name="email" required
+                        class="w-full bg-cream border-2 border-ink/10 rounded-xl px-4 py-3 font-body text-base text-ink placeholder:text-ink/30 focus:border-pop focus:outline-none transition-colors mb-4"
+                        placeholder="your@email.com">
+                    <button type="submit" class="btn-fun w-full px-6 py-4 bg-pop text-white text-sm uppercase tracking-widest">
+                        Sign Me Up
+                    </button>
+                </form>
+
+                <div id="waitlist-success" class="hidden text-center py-4">
+                    <div class="font-display text-xl font-800 text-pop mb-2">You're on the list!</div>
+                    <p class="font-body text-sm text-ink/50">We'll be in touch when Morkis is ready to bite.</p>
+                </div>
+
+                <p class="font-mono text-[10px] text-ink/30 text-center mt-4 leading-relaxed">
+                    We respect your privacy. Your email will only be used to send updates about Morkis. We won't send you spam or share with third parties. You can unsubscribe at any time.
+                </p>
+            </div>
+        </div>
+    </div>
 
     <!-- FOOTER -->
     <footer class="border-t border-ink/10 py-12">
@@ -834,6 +874,42 @@
                 nav.style.borderBottomColor = 'transparent';
                 nav.style.boxShadow = 'none';
             }
+        });
+
+
+        // ============ WAITLIST MODAL ============
+        function openWaitlist() {
+            const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+            document.body.style.paddingRight = scrollbarWidth + 'px';
+            document.querySelector('nav').style.paddingRight = scrollbarWidth + 'px';
+            document.body.style.overflow = 'hidden';
+            document.getElementById('waitlist-modal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('waitlist-email')?.focus(), 100);
+        }
+        function closeWaitlist() {
+            document.getElementById('waitlist-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+            document.querySelector('nav').style.paddingRight = '';
+        }
+        function submitWaitlist(e) {
+            e.preventDefault();
+            const form = e.target;
+            const email = document.getElementById('waitlist-email').value;
+            fetch('/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams(new FormData(form)).toString()
+            }).then(() => {
+                document.getElementById('waitlist-form').classList.add('hidden');
+                document.getElementById('waitlist-success').classList.remove('hidden');
+            }).catch(() => {
+                document.getElementById('waitlist-form').classList.add('hidden');
+                document.getElementById('waitlist-success').classList.remove('hidden');
+            });
+        }
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeWaitlist();
         });
 
         // ============ LUCIDE ICONS ============
