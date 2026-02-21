@@ -15,15 +15,15 @@
                     colors: {
                         cream: '#F7F7F7',
                         ink: '#3C3C3C',
-                        moss: '#58CC02',
-                        mint: '#89E219',
+                        moss: '#006D5B',
+                        mint: '#A8E6CF',
                         coral: '#FF4B4B',
                         sunshine: '#FFC800',
                         lavender: '#CE82FF',
                         sky: '#1CB0F6',
                         muted: '#AFAFAF',
                         bite: '#FF4B4B',
-                        chill: '#58CC02',
+                        chill: '#006D5B',
                     },
                     fontFamily: {
                         display: ['Bricolage Grotesque', 'sans-serif'],
@@ -79,7 +79,7 @@
         }
         .wiggle { animation: wiggle 0.5s ease; }
 
-        .marker { background: linear-gradient(180deg, transparent 60%, rgba(88, 204, 2, 0.2) 40%); padding: 0 2px; }
+        .marker { background: linear-gradient(180deg, transparent 60%, rgba(0, 109, 91, 0.2) 40%); padding: 0 2px; }
 
         input[type="range"] {
             -webkit-appearance: none; appearance: none;
@@ -89,7 +89,7 @@
         }
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none; width: 28px; height: 28px;
-            border-radius: 50%; background: #58CC02;
+            border-radius: 50%; background: #006D5B;
             border: none; cursor: pointer;
             box-shadow: 0 2px 4px rgba(0,0,0,0.15);
         }
@@ -104,16 +104,16 @@
         @media(min-width:768px) { .mobile-tabs { display: none !important; } }
 
         .tab { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:4px 0; cursor:pointer; color:#AFAFAF; }
-        .tab.active svg { color: #58CC02; }
-        .tab.active span { color: #58CC02; }
+        .tab.active svg { color: #006D5B; }
+        .tab.active span { color: #006D5B; }
 
         /* Desktop nav */
         .desktop-nav { display: none; }
         @media(min-width:768px) {
             .desktop-nav {
                 display: flex; position: fixed; top: 0; left: 0; right: 0;
-                background: rgba(255,255,255,0.95); backdrop-filter: blur(12px);
-                border-bottom: 1px solid #E5E5E5; z-index: 50;
+                background: rgba(247,247,247,0.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+                border-bottom: 1px solid rgba(60,60,60,0.1); z-index: 50;
             }
         }
     </style>
@@ -122,10 +122,10 @@
 
 <!-- ======== DESKTOP NAV ======== -->
 <nav class="desktop-nav">
-    <div class="max-w-5xl mx-auto w-full px-6 py-3 flex items-center justify-between">
+    <div class="max-w-7xl mx-auto w-full px-6 py-4 flex items-center justify-between">
         <a href="index.html" class="flex items-center gap-2 no-underline">
-            <img src="https://res.cloudinary.com/yevhenii-kalashnyk/image/upload/e_background_removal/c_fill,ar_3:4,g_auto,f_png/v1771693879/Gemini_Generated_Image_3goprg3goprg3gop_l9flik.png" alt="Morkis" class="w-7 h-9 object-contain">
-            <span class="font-display text-lg font-extrabold text-ink">MORKIS</span>
+            <img src="https://res.cloudinary.com/yevhenii-kalashnyk/image/upload/e_background_removal/c_fill,ar_3:4,g_auto,f_png/v1771693879/Gemini_Generated_Image_3goprg3goprg3gop_l9flik.png" alt="Morkis" class="w-8 h-10 object-contain">
+            <span class="font-display text-xl font-extrabold tracking-wide text-ink">MORKIS</span>
         </a>
         <div class="flex items-center gap-1">
             <button onclick="goTo('screen-home')" class="nav-link px-4 py-2 rounded-full font-display text-sm font-bold text-ink/50 hover:bg-ink/5 transition-colors" data-screen="screen-home">Home</button>
@@ -199,7 +199,7 @@
             <div class="md:col-span-3 space-y-5">
 
                 <!-- Morkis Habitat -->
-                <div class="card p-6 text-center relative overflow-hidden" style="background: linear-gradient(180deg, #D0ECFF 0%, #E8F9E8 100%); border-color: #58CC02;">
+                <div class="card p-6 text-center relative overflow-hidden" style="background: linear-gradient(180deg, #D0ECE6 0%, #E0F5F0 100%); border-color: #006D5B;">
                     <div class="absolute top-3 right-4 w-8 h-8 bg-sunshine rounded-full opacity-50"></div>
                     <div class="float inline-block relative">
                         <img src="https://res.cloudinary.com/yevhenii-kalashnyk/image/upload/e_background_removal/c_fill,ar_3:4,g_auto,f_png/v1771693879/Gemini_Generated_Image_3goprg3goprg3gop_l9flik.png" alt="Morkis" class="w-24 md:w-32 object-contain mx-auto drop-shadow-[3px_3px_0_rgba(30,30,30,0.1)]">
@@ -221,7 +221,7 @@
                         <button onclick="goTo('screen-contract')" class="font-display text-sm font-bold text-moss uppercase tracking-widest">+ NEW</button>
                     </div>
                     <div class="space-y-3" id="pact-list">
-                        <div class="card p-4" style="border-color: #58CC02;">
+                        <div class="card p-4" style="border-color: #006D5B;">
                             <div class="flex items-center justify-between mb-3">
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 bg-moss/10 border-2 border-moss rounded-lg flex items-center justify-center"><i data-lucide="utensils" class="w-5 h-5 text-moss"></i></div>
@@ -311,13 +311,13 @@
     <div class="max-w-lg mx-auto w-full px-5 pt-4 pb-24 md:pt-20 md:pb-12">
 
         <button onclick="goTo('screen-home')" class="md:hidden mb-4 card w-8 h-8 flex items-center justify-center" style="border-width:2px;">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#1E1E1E" stroke-width="2.5" stroke-linecap="round"><path d="M10 3L5 8L10 13"/></svg>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#3C3C3C" stroke-width="2.5" stroke-linecap="round"><path d="M10 3L5 8L10 13"/></svg>
         </button>
 
         <div class="font-display text-2xl font-extrabold mb-5">New Pact</div>
 
         <!-- Pact Card -->
-        <div class="card p-5 mb-5" style="border-style:dashed; border-color:#58CC02;">
+        <div class="card p-5 mb-5" style="border-style:dashed; border-color:#006D5B;">
             <div class="font-mono text-xs text-muted uppercase tracking-[0.2em] mb-3">SMART CONTRACT — DRAFT</div>
 
             <div class="font-display text-sm font-bold text-ink/40 uppercase tracking-widest mb-2">I promise to...</div>
@@ -378,7 +378,7 @@
 
             <div class="font-mono text-xs text-ink/40 uppercase tracking-[0.15em] mb-2 mt-3">NEMESIS OPTIONS</div>
             <div class="space-y-2 mb-4" id="nemesis-list">
-                <div class="bg-cream border-2 rounded-xl p-3 flex items-center gap-3 cursor-pointer nemesis-option" onclick="selectNemesis(this)" style="border-color:#58CC02; background:#58CC0208;">
+                <div class="bg-cream border-2 rounded-xl p-3 flex items-center gap-3 cursor-pointer nemesis-option" onclick="selectNemesis(this)" style="border-color:#006D5B; background:#006D5B08;">
                     <span class="w-8 h-8 bg-bite/10 border-2 border-ink/20 rounded-lg flex items-center justify-center"><i data-lucide="landmark" class="w-4 h-4 text-bite"></i></span>
                     <div class="flex-1">
                         <div class="font-display text-base font-bold">The Politician</div>
@@ -460,7 +460,7 @@
     <div class="max-w-lg mx-auto w-full px-5 pt-4 pb-24 md:pt-20 md:pb-12">
 
         <button onclick="goTo('screen-home')" class="md:hidden mb-4 card w-8 h-8 flex items-center justify-center" style="border-width:2px;">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#1E1E1E" stroke-width="2.5" stroke-linecap="round"><path d="M10 3L5 8L10 13"/></svg>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#3C3C3C" stroke-width="2.5" stroke-linecap="round"><path d="M10 3L5 8L10 13"/></svg>
         </button>
 
         <div class="font-display text-2xl font-extrabold mb-1">Group Pact</div>
@@ -469,44 +469,44 @@
         <p class="font-body text-base text-ink/50 mb-5">One person fails, <span class="text-ink font-semibold">everyone loses.</span></p>
 
         <!-- The Pact -->
-        <div class="card p-4 mb-4" style="border-color:#58CC02;">
+        <div class="card p-4 mb-4" style="border-color:#006D5B;">
             <div class="font-mono text-xs text-muted uppercase tracking-[0.2em] mb-2">GROUP CONTRACT</div>
             <div class="font-display text-lg font-bold">“No fast fashion this month”</div>
             <div class="font-body text-sm text-muted mt-1">30 days · Ends Feb 28</div>
         </div>
 
         <!-- Pool -->
-        <div class="card p-4 mb-4 text-center" style="background:linear-gradient(135deg,#006D5B,#004D40); border-color:#58CC02;">
-            <div class="font-mono text-xs text-white/50 uppercase tracking-[0.2em] mb-1">TOTAL STAKE POOL</div>
-            <div class="font-display text-4xl font-extrabold text-white">€200</div>
-            <div class="font-body text-sm text-mint/80 mt-1">4 people × €50</div>
+        <div class="card p-4 mb-4 text-center" style="border-color:#006D5B;">
+            <div class="font-mono text-xs text-muted uppercase tracking-[0.2em] mb-1">TOTAL STAKE POOL</div>
+            <div class="font-display text-4xl font-extrabold text-moss">€200</div>
+            <div class="font-body text-sm text-muted mt-1">4 people × €50</div>
         </div>
 
         <!-- Participants -->
         <div class="mb-4">
             <div class="font-display text-sm font-bold uppercase tracking-widest mb-3">Participants</div>
             <div class="grid grid-cols-2 gap-2">
-                <div class="bg-cream border-2 border-moss/20 rounded-xl p-3 text-center">
-                    <div class="w-10 h-10 bg-moss/10 border-2 border-ink rounded-full flex items-center justify-center mx-auto mb-1 overflow-hidden">
+                <div class="bg-cream border-2 border-ink/10 rounded-xl p-3 text-center">
+                    <div class="w-10 h-10 bg-ink/5 border-2 border-ink/20 rounded-full flex items-center justify-center mx-auto mb-1 overflow-hidden">
                         <img src="https://res.cloudinary.com/yevhenii-kalashnyk/image/upload/e_background_removal/c_fill,ar_3:4,g_auto,f_png/v1771693879/Gemini_Generated_Image_3goprg3goprg3gop_l9flik.png" alt="" class="w-6 h-8 object-contain">
                     </div>
                     <div class="font-display text-sm font-bold">You</div>
-                    <div class="font-mono text-xs text-moss font-bold">88% integrity</div>
+                    <div class="font-mono text-xs text-moss font-bold">88%</div>
                 </div>
-                <div class="bg-cream border-2 border-coral/20 rounded-xl p-3 text-center">
-                    <div class="w-10 h-10 bg-coral/10 border-2 border-ink rounded-full flex items-center justify-center mx-auto mb-1"><i data-lucide="user" class="w-5 h-5 text-coral"></i></div>
+                <div class="bg-cream border-2 border-ink/10 rounded-xl p-3 text-center">
+                    <div class="w-10 h-10 bg-ink/5 border-2 border-ink/20 rounded-full flex items-center justify-center mx-auto mb-1"><i data-lucide="user" class="w-5 h-5 text-ink/40"></i></div>
                     <div class="font-display text-sm font-bold">Sara</div>
-                    <div class="font-mono text-xs text-coral font-bold">60% integrity <i data-lucide="alert-triangle" class="w-3 h-3 inline text-coral"></i></div>
+                    <div class="font-mono text-xs text-coral font-bold">60% <i data-lucide="alert-triangle" class="w-3 h-3 inline text-coral"></i></div>
                 </div>
-                <div class="bg-cream border-2 border-sunshine/30 rounded-xl p-3 text-center">
-                    <div class="w-10 h-10 bg-sunshine/10 border-2 border-ink rounded-full flex items-center justify-center mx-auto mb-1"><i data-lucide="user" class="w-5 h-5 text-sunshine"></i></div>
+                <div class="bg-cream border-2 border-ink/10 rounded-xl p-3 text-center">
+                    <div class="w-10 h-10 bg-ink/5 border-2 border-ink/20 rounded-full flex items-center justify-center mx-auto mb-1"><i data-lucide="user" class="w-5 h-5 text-ink/40"></i></div>
                     <div class="font-display text-sm font-bold">Erik</div>
-                    <div class="font-mono text-xs text-ink/50 font-bold">72% integrity</div>
+                    <div class="font-mono text-xs text-ink/50 font-bold">72%</div>
                 </div>
-                <div class="bg-cream border-2 border-moss/20 rounded-xl p-3 text-center">
-                    <div class="w-10 h-10 bg-moss/10 border-2 border-ink rounded-full flex items-center justify-center mx-auto mb-1"><i data-lucide="user" class="w-5 h-5 text-moss"></i></div>
+                <div class="bg-cream border-2 border-ink/10 rounded-xl p-3 text-center">
+                    <div class="w-10 h-10 bg-ink/5 border-2 border-ink/20 rounded-full flex items-center justify-center mx-auto mb-1"><i data-lucide="user" class="w-5 h-5 text-ink/40"></i></div>
                     <div class="font-display text-sm font-bold">Dave</div>
-                    <div class="font-mono text-xs text-moss font-bold">92% integrity</div>
+                    <div class="font-mono text-xs text-moss font-bold">92%</div>
                 </div>
             </div>
         </div>
@@ -539,7 +539,7 @@
         <div class="font-body text-base text-muted mb-4">You broke your word. Here’s what happened:</div>
 
         <!-- How it works explanation -->
-        <div class="w-full p-4 mb-4 rounded-xl" style="background:#FF6B6B08;">
+        <div class="w-full p-4 mb-4 rounded-xl" style="background:#FF4B4B08;">
             <div class="font-display text-sm font-bold text-coral uppercase tracking-widest mb-2"><i data-lucide="search" class="w-4 h-4 inline mr-1 text-coral"></i>How we caught you</div>
             <div class="space-y-2">
                 <div class="flex items-start gap-2">
@@ -573,7 +573,7 @@
         </div>
 
         <!-- Roast -->
-        <div class="w-full p-4 mb-5 rounded-xl" style="background:#FF6B6B08;">
+        <div class="w-full p-4 mb-5 rounded-xl" style="background:#FF4B4B08;">
             <div class="font-display text-sm font-bold text-coral uppercase tracking-widest mb-2">Your Roast</div>
             <div class="bg-cream border-2 border-ink/5 rounded-xl p-3">
                 <p class="font-display text-sm font-semibold text-ink/70 italic leading-relaxed">
@@ -600,7 +600,7 @@
     <div class="max-w-2xl mx-auto w-full px-5 pt-4 pb-24 md:pt-20 md:pb-12">
 
         <button onclick="goTo('screen-home')" class="md:hidden mb-4 card w-8 h-8 flex items-center justify-center" style="border-width:2px;">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#1E1E1E" stroke-width="2.5" stroke-linecap="round"><path d="M10 3L5 8L10 13"/></svg>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#3C3C3C" stroke-width="2.5" stroke-linecap="round"><path d="M10 3L5 8L10 13"/></svg>
         </button>
 
         <div class="flex items-center justify-between mb-5">
@@ -611,7 +611,7 @@
         <p class="font-body text-base text-muted mb-5">Prove you’re disciplined enough to dress your monster.</p>
 
         <!-- Current Morkis -->
-        <div class="card p-6 mb-5 text-center" style="background:linear-gradient(180deg,#D0ECFF,#E8F9E8);">
+        <div class="card p-6 mb-5 text-center" style="background:linear-gradient(180deg,#D0ECE6,#E0F5F0);">
             <div class="float inline-block relative">
                 <img src="https://res.cloudinary.com/yevhenii-kalashnyk/image/upload/e_background_removal/c_fill,ar_3:4,g_auto,f_png/v1771693879/Gemini_Generated_Image_3goprg3goprg3gop_l9flik.png" alt="Morkis" class="w-24 object-contain mx-auto">
                 <div class="absolute -top-4 left-1/2 -translate-x-1/2"><i data-lucide="crown" class="w-6 h-6 text-sunshine"></i></div>
@@ -622,7 +622,7 @@
         <!-- Items -->
         <div class="font-display text-sm font-bold uppercase tracking-widest mb-3">Cosmetics</div>
         <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-            <div class="card p-4 text-center" style="border-color:#58CC02;">
+            <div class="card p-4 text-center" style="border-color:#006D5B;">
                 <div class="text-2xl mb-2"><i data-lucide="crown" class="w-6 h-6 text-sunshine mx-auto"></i></div>
                 <div class="font-display text-sm font-bold">Tiny Crown</div>
                 <div class="mt-1.5 px-2 py-0.5 bg-moss/10 rounded-full font-mono text-xs text-moss font-bold inline-block">OWNED ✓</div>
@@ -692,10 +692,10 @@
         const r = document.getElementById('morkis-reaction');
         m.classList.add('wiggle');
         setTimeout(() => m.classList.remove('wiggle'), 500);
-        if (v <= 20) { r.textContent = 'That all?'; r.style.color = '#8A8A8A'; }
+        if (v <= 20) { r.textContent = 'That all?'; r.style.color = '#AFAFAF'; }
         else if (v <= 40) { r.textContent = 'Not bad!'; r.style.color = '#006D5B'; }
         else if (v <= 70) { r.textContent = 'Now we\'re talking!'; r.style.color = '#006D5B'; }
-        else { r.textContent = 'BRAVE!'; r.style.color = '#FF6B6B'; }
+        else { r.textContent = 'BRAVE!'; r.style.color = '#FF4B4B'; }
     }
 
     function setPact(t) {
@@ -798,20 +798,20 @@
 
     function selectDuration(btn) {
         document.querySelectorAll('.duration-btn').forEach(b => {
-            b.style.background = '#F8F6F0'; b.style.color = '#1E1E1E'; b.style.borderColor = 'rgba(30,30,30,0.1)';
+            b.style.background = '#F7F7F7'; b.style.color = '#3C3C3C'; b.style.borderColor = 'rgba(60,60,60,0.1)';
         });
-        btn.style.background = '#006D5B'; btn.style.color = 'white'; btn.style.borderColor = '#1E1E1E';
+        btn.style.background = '#006D5B'; btn.style.color = 'white'; btn.style.borderColor = '#006D5B';
     }
 
     function selectNemesis(el) {
         document.querySelectorAll('.nemesis-option').forEach(o => {
-            o.style.borderColor = 'rgba(30,30,30,0.1)'; o.style.background = '#F8F6F0';
+            o.style.borderColor = 'rgba(60,60,60,0.1)'; o.style.background = '#F7F7F7';
             const r = o.querySelector('.nemesis-check');
             if (r) { r.style.borderColor = 'rgba(30,30,30,0.2)'; r.style.background = 'transparent'; r.textContent = ''; r.style.color = 'transparent'; r.style.fontSize = '0'; }
         });
-        el.style.borderColor = '#006D5B'; el.style.background = '#58CC0208';
+        el.style.borderColor = '#006D5B'; el.style.background = '#006D5B08';
         const r = el.querySelector('.nemesis-check');
-        if (r) { r.style.borderColor = '#006D5B'; r.style.background = '#006D5B'; r.textContent = '✓'; r.style.color = 'white'; r.style.fontSize = '10px'; r.style.fontWeight = '900'; }
+        if (r) { r.style.borderColor = '#006D5B'; r.style.background = '#006D5B'; r.textContent = '\u2713'; r.style.color = 'white'; r.style.fontSize = '10px'; r.style.fontWeight = '900'; }
     }
 
     // Init: mark home as active in desktop nav
