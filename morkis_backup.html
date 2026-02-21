@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Morkis — The Nordic Accountability Monster</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        base: '#080808',
+                        cyan: '#00F0FF',
+                        crimson: '#FF003C',
+                        'dark-card': '#0f0f0f',
+                        'dark-border': '#1a1a1a',
+                        'muted': '#555555',
+                    },
+                    fontFamily: {
+                        serif: ['DM Serif Display', 'serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { background: #080808; color: #e0e0e0; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #080808; }
+        ::-webkit-scrollbar-thumb { background: #00F0FF33; border-radius: 3px; }
+
+        /* Glitch Animation */
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+        .glitch-text:hover {
+            animation: glitch 0.3s ease infinite;
+        }
+
+        /* Glow Effects */
+        .cyan-glow { text-shadow: 0 0 20px rgba(0,240,255,0.5), 0 0 40px rgba(0,240,255,0.2); }
+        .crimson-glow { text-shadow: 0 0 20px rgba(255,0,60,0.5), 0 0 40px rgba(255,0,60,0.2); }
+        .cyan-box-glow { box-shadow: 0 0 30px rgba(0,240,255,0.15), inset 0 0 30px rgba(0,240,255,0.05); }
+        .crimson-box-glow { box-shadow: 0 0 30px rgba(255,0,60,0.15), inset 0 0 30px rgba(255,0,60,0.05); }
+
+        /* Horizontal Scroll */
+        .horizontal-scroll {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            gap: 1.5rem;
+            padding: 1rem 0;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .horizontal-scroll::-webkit-scrollbar { display: none; }
+        .horizontal-scroll > div { scroll-snap-align: start; flex-shrink: 0; }
+
+        /* Pulse Ring */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(1.8); opacity: 0; }
+        }
+        .pulse-ring::before {
+            content: '';
+            position: absolute;
+            inset: -8px;
+            border: 2px solid #FF003C;
+            border-radius: inherit;
+            animation: pulse-ring 2s ease-out infinite;
+        }
+
+        /* Waveform */
+        @keyframes waveform {
+            0%, 100% { height: 8px; }
+            50% { height: 100%; }
+        }
+        .wave-bar {
+            animation: waveform 1.2s ease-in-out infinite;
+        }
+
+        /* Float */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .float { animation: float 4s ease-in-out infinite; }
+
+        /* Scanline */
+        @keyframes scanline {
+            0% { top: -10%; }
+            100% { top: 110%; }
+        }
+        .scanline-overlay::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 30%;
+            background: linear-gradient(transparent, rgba(0,240,255,0.03), transparent);
+            pointer-events: none;
+            animation: scanline 4s linear infinite;
+        }
+
+        /* Card hover */
+        .hover-lift { transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease; }
+        .hover-lift:hover { transform: translateY(-6px) scale(1.02); }
+
+        /* Capture animation */
+        @keyframes capture-slide {
+            0% { transform: translateY(40px) scale(0.9); opacity: 0; }
+            60% { transform: translateY(-5px) scale(1.02); opacity: 1; }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        .capture-animate {
+            animation: capture-slide 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        /* Bento Grid */
+        @media (min-width: 768px) {
+            .bento-grid {
+                display: grid;
+                grid-template-columns: repeat(12, 1fr);
+                gap: 1.5rem;
+            }
+        }
+
+        /* Integrity graph gradient */
+        .graph-gradient {
+            background: linear-gradient(180deg, rgba(0,240,255,0.2) 0%, rgba(255,0,60,0.2) 100%);
+        }
+
+        /* Noise texture */
+        .noise-bg {
+            position: relative;
+        }
+        .noise-bg::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body class="noise-bg">
+
+    <!-- NAV -->
+    <nav class="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-base/80 border-b border-dark-border">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl">👹</span>
+                <span class="font-serif text-xl text-cyan cyan-glow tracking-wide">MORKIS</span>
+            </div>
+            <div class="hidden md:flex items-center gap-8 font-mono text-xs uppercase tracking-widest text-muted">
+                <a href="#nemesis" class="hover:text-cyan transition-colors duration-300">Nemesis Fund</a>
+                <a href="#bite" class="hover:text-cyan transition-colors duration-300">The Bite</a>
+                <a href="#oracle" class="hover:text-cyan transition-colors duration-300">Oracle</a>
+                <a href="#roast" class="hover:text-cyan transition-colors duration-300">Roast</a>
+            </div>
+            <button class="relative px-5 py-2 bg-cyan/10 border border-cyan/30 text-cyan font-mono text-sm rounded-sm hover:bg-cyan/20 transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,240,255,0.3)]">
+                STAKE NOW
+            </button>
+        </div>
+    </nav>
+
+    <!-- SECTION 1: HERO -->
+    <section class="relative min-h-screen flex items-center justify-center overflow-hidden scanline-overlay pt-20">
+        <!-- Background radial -->
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,240,255,0.06)_0%,transparent_70%)]"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(255,0,60,0.04)_0%,transparent_50%)]"></div>
+
+        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center relative z-10">
+            <!-- Left: Copy -->
+            <div class="order-2 md:order-1">
+                <div class="font-mono text-xs text-crimson uppercase tracking-[0.3em] mb-6 flex items-center gap-2">
+                    <span class="inline-block w-2 h-2 bg-crimson rounded-full animate-pulse"></span>
+                    BEHAVIORAL ECONOMICS WITH TEETH
+                </div>
+                <h1 class="font-serif text-4xl sm:text-5xl lg:text-6xl leading-[1.1] mb-6">
+                    Stop lying to yourself.<br>
+                    <span class="text-cyan cyan-glow">Start paying for your flakes.</span>
+                </h1>
+                <p class="text-lg text-neutral-400 leading-relaxed mb-8 max-w-lg">
+                    Morkis is the only AI agent that monitors your bank feed and 
+                    <span class="text-crimson font-medium">eats your money</span> if you break your word. 
+                    Powered by Kahneman's <span class="text-white font-medium">Loss Aversion</span> theory.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 mb-8">
+                    <button class="group px-8 py-4 bg-cyan text-base font-mono font-bold text-sm uppercase tracking-widest hover:shadow-[0_0_40px_rgba(0,240,255,0.4)] transition-all duration-500 relative overflow-hidden">
+                        <span class="relative z-10">MAKE A PROMISE</span>
+                        <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+                    </button>
+                    <button class="px-8 py-4 border border-dark-border text-neutral-400 font-mono text-sm uppercase tracking-widest hover:border-cyan/50 hover:text-cyan transition-all duration-300">
+                        SEE THE DATA
+                    </button>
+                </div>
+                <!-- Stats -->
+                <div class="flex gap-8 pt-4 border-t border-dark-border">
+                    <div>
+                        <div class="font-mono text-2xl text-white font-bold">€2.4M</div>
+                        <div class="font-mono text-xs text-muted uppercase tracking-wider">Staked</div>
+                    </div>
+                    <div>
+                        <div class="font-mono text-2xl text-crimson font-bold">€890K</div>
+                        <div class="font-mono text-xs text-muted uppercase tracking-wider">Eaten</div>
+                    </div>
+                    <div>
+                        <div class="font-mono text-2xl text-cyan font-bold">73%</div>
+                        <div class="font-mono text-xs text-muted uppercase tracking-wider">Flake Rate</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Mascot SVG -->
+            <div class="order-1 md:order-2 flex justify-center items-center">
+                <div id="mascot-container" class="relative float" style="width: 380px; height: 420px;">
+                    <svg id="morkis-svg" viewBox="0 0 380 420" width="380" height="420" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Body Shadow -->
+                        <ellipse cx="190" cy="400" rx="100" ry="15" fill="rgba(0,240,255,0.08)"/>
+
+                        <!-- Body -->
+                        <ellipse cx="190" cy="260" rx="130" ry="140" fill="#111" stroke="#1a1a1a" stroke-width="2"/>
+                        <ellipse cx="190" cy="260" rx="130" ry="140" fill="url(#bodyGrad)" opacity="0.5"/>
+
+                        <!-- Body texture lines -->
+                        <path d="M 100 200 Q 190 180 280 200" stroke="#1a1a1a" stroke-width="1" fill="none"/>
+                        <path d="M 90 240 Q 190 220 290 240" stroke="#1a1a1a" stroke-width="1" fill="none"/>
+                        <path d="M 95 280 Q 190 260 285 280" stroke="#1a1a1a" stroke-width="1" fill="none"/>
+
+                        <!-- Left Eye White -->
+                        <ellipse cx="145" cy="220" rx="48" ry="52" fill="#0a0a0a" stroke="#00F0FF" stroke-width="1.5"/>
+                        <ellipse cx="145" cy="220" rx="48" ry="52" fill="url(#eyeGlow)" opacity="0.3"/>
+
+                        <!-- Right Eye White -->
+                        <ellipse cx="235" cy="220" rx="48" ry="52" fill="#0a0a0a" stroke="#00F0FF" stroke-width="1.5"/>
+                        <ellipse cx="235" cy="220" rx="48" ry="52" fill="url(#eyeGlow)" opacity="0.3"/>
+
+                        <!-- Left Iris -->
+                        <g id="left-eye-group">
+                            <circle id="left-iris" cx="145" cy="225" r="22" fill="#00F0FF"/>
+                            <circle id="left-pupil" cx="145" cy="225" r="12" fill="#080808"/>
+                            <circle cx="138" cy="216" r="5" fill="rgba(255,255,255,0.6)"/>
+                            <circle cx="150" cy="212" r="2.5" fill="rgba(255,255,255,0.4)"/>
+                        </g>
+
+                        <!-- Right Iris -->
+                        <g id="right-eye-group">
+                            <circle id="right-iris" cx="235" cy="225" r="22" fill="#00F0FF"/>
+                            <circle id="right-pupil" cx="235" cy="225" r="12" fill="#080808"/>
+                            <circle cx="228" cy="216" r="5" fill="rgba(255,255,255,0.6)"/>
+                            <circle cx="240" cy="212" r="2.5" fill="rgba(255,255,255,0.4)"/>
+                        </g>
+
+                        <!-- Eyebrows (angry) -->
+                        <line x1="100" y1="165" x2="155" y2="172" stroke="#00F0FF" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
+                        <line x1="215" y1="172" x2="270" y2="165" stroke="#00F0FF" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
+
+                        <!-- Mouth -->
+                        <path d="M 130 310 Q 145 290 160 310 Q 175 290 190 310 Q 205 290 220 310 Q 235 290 250 310" fill="none" stroke="#FF003C" stroke-width="3" stroke-linecap="round"/>
+
+                        <!-- Teeth -->
+                        <polygon points="140,310 145,328 150,310" fill="#FF003C" opacity="0.8"/>
+                        <polygon points="160,310 165,325 170,310" fill="#FF003C" opacity="0.8"/>
+                        <polygon points="180,310 185,330 190,310" fill="#FF003C" opacity="0.9"/>
+                        <polygon points="200,310 205,325 210,310" fill="#FF003C" opacity="0.8"/>
+                        <polygon points="220,310 225,328 230,310" fill="#FF003C" opacity="0.8"/>
+
+                        <!-- Small horns -->
+                        <polygon points="120,135 130,120 140,140" fill="#1a1a1a" stroke="#00F0FF" stroke-width="1" opacity="0.6"/>
+                        <polygon points="240,140 250,120 260,135" fill="#1a1a1a" stroke="#00F0FF" stroke-width="1" opacity="0.6"/>
+
+                        <!-- Little arms -->
+                        <ellipse cx="68" cy="290" rx="18" ry="25" fill="#111" stroke="#1a1a1a" stroke-width="1.5" transform="rotate(-15,68,290)"/>
+                        <ellipse cx="312" cy="290" rx="18" ry="25" fill="#111" stroke="#1a1a1a" stroke-width="1.5" transform="rotate(15,312,290)"/>
+
+                        <!-- Feet -->
+                        <ellipse cx="150" cy="385" rx="30" ry="12" fill="#111" stroke="#1a1a1a" stroke-width="1.5"/>
+                        <ellipse cx="230" cy="385" rx="30" ry="12" fill="#111" stroke="#1a1a1a" stroke-width="1.5"/>
+
+                        <!-- Gradients -->
+                        <defs>
+                            <radialGradient id="bodyGrad">
+                                <stop offset="0%" stop-color="#00F0FF" stop-opacity="0.05"/>
+                                <stop offset="100%" stop-color="transparent"/>
+                            </radialGradient>
+                            <radialGradient id="eyeGlow">
+                                <stop offset="0%" stop-color="#00F0FF" stop-opacity="0.15"/>
+                                <stop offset="100%" stop-color="transparent"/>
+                            </radialGradient>
+                        </defs>
+                    </svg>
+
+                    <!-- Floating labels around mascot -->
+                    <div class="absolute top-2 right-0 font-mono text-[10px] text-crimson/60 uppercase tracking-widest">ALWAYS WATCHING</div>
+                    <div class="absolute bottom-8 left-0 font-mono text-[10px] text-cyan/40 uppercase tracking-widest">v3.1.4 · KAHNEMAN ENGINE</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scroll indicator -->
+        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-muted">
+            <span class="font-mono text-[10px] uppercase tracking-[0.3em]">Scroll</span>
+            <div class="w-px h-8 bg-gradient-to-b from-cyan/50 to-transparent animate-pulse"></div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: NEMESIS FUND -->
+    <section id="nemesis" class="relative py-24 md:py-32">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,0,60,0.04)_0%,transparent_60%)]"></div>
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="mb-16">
+                <div class="font-mono text-xs text-crimson uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
+                    <span class="inline-block w-2 h-2 bg-crimson rounded-full"></span>
+                    THE NEMESIS FUND
+                </div>
+                <h2 class="font-serif text-3xl sm:text-4xl lg:text-5xl mb-4">
+                    Choose your <span class="text-crimson crimson-glow">punishment.</span>
+                </h2>
+                <p class="text-neutral-400 max-w-2xl text-lg leading-relaxed">
+                    If you fail, your Stripe deposit doesn't go to us. <span class="text-white">It goes to them.</span> Choose the recipient that would hurt your soul the most.
+                </p>
+            </div>
+
+            <!-- Horizontal Scroll Cards -->
+            <div class="horizontal-scroll pb-4">
+                <!-- The Rival -->
+                <div class="w-[320px] md:w-[360px] bg-dark-card border border-dark-border rounded-sm p-8 hover-lift cursor-pointer group relative overflow-hidden">
+                    <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-crimson to-crimson/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="text-5xl mb-6">⚽</div>
+                    <div class="font-mono text-xs text-crimson uppercase tracking-[0.2em] mb-2">Category: Sports</div>
+                    <h3 class="font-serif text-2xl text-white mb-3">The Rival</h3>
+                    <p class="text-neutral-400 text-sm leading-relaxed mb-6">Your €50 goes directly to the official supporters' fund of the team you despise most.</p>
+                    <div class="flex items-center justify-between pt-4 border-t border-dark-border">
+                        <span class="font-mono text-xs text-muted">Most chosen: 42%</span>
+                        <span class="text-crimson text-sm font-mono group-hover:translate-x-1 transition-transform">SELECT →</span>
+                    </div>
+                </div>
+
+                <!-- The Politician -->
+                <div class="w-[320px] md:w-[360px] bg-dark-card border border-dark-border rounded-sm p-8 hover-lift cursor-pointer group relative overflow-hidden">
+                    <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-crimson to-crimson/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="text-5xl mb-6">🏛️</div>
+                    <div class="font-mono text-xs text-crimson uppercase tracking-[0.2em] mb-2">Category: Politics</div>
+                    <h3 class="font-serif text-2xl text-white mb-3">The Politician</h3>
+                    <p class="text-neutral-400 text-sm leading-relaxed mb-6">Your money funds the campaign of the candidate whose values you find most repulsive.</p>
+                    <div class="flex items-center justify-between pt-4 border-t border-dark-border">
+                        <span class="font-mono text-xs text-muted">Pain index: 9.2/10</span>
+                        <span class="text-crimson text-sm font-mono group-hover:translate-x-1 transition-transform">SELECT →</span>
+                    </div>
+                </div>
+
+                <!-- The Ex -->
+                <div class="w-[320px] md:w-[360px] bg-dark-card border border-dark-border rounded-sm p-8 hover-lift cursor-pointer group relative overflow-hidden">
+                    <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-crimson to-crimson/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="text-5xl mb-6">💔</div>
+                    <div class="font-mono text-xs text-crimson uppercase tracking-[0.2em] mb-2">Category: Personal</div>
+                    <h3 class="font-serif text-2xl text-white mb-3">The Ex</h3>
+                    <p class="text-neutral-400 text-sm leading-relaxed mb-6">Enter their Venmo handle. They'll receive a notification with your name on it. No context.</p>
+                    <div class="mt-2 mb-4">
+                        <input type="text" placeholder="@their-venmo-handle" class="w-full bg-base border border-dark-border px-4 py-3 font-mono text-sm text-white placeholder:text-muted/50 focus:border-crimson/50 focus:outline-none transition-colors rounded-sm"/>
+                    </div>
+                    <div class="flex items-center justify-between pt-4 border-t border-dark-border">
+                        <span class="font-mono text-xs text-muted">Cruelty: Maximum</span>
+                        <span class="text-crimson text-sm font-mono group-hover:translate-x-1 transition-transform">SELECT →</span>
+                    </div>
+                </div>
+
+                <!-- The Cause -->
+                <div class="w-[320px] md:w-[360px] bg-dark-card border border-dark-border rounded-sm p-8 hover-lift cursor-pointer group relative overflow-hidden">
+                    <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-crimson to-crimson/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="text-5xl mb-6">🔥</div>
+                    <div class="font-mono text-xs text-crimson uppercase tracking-[0.2em] mb-2">Category: Ideology</div>
+                    <h3 class="font-serif text-2xl text-white mb-3">The Anti-Cause</h3>
+                    <p class="text-neutral-400 text-sm leading-relaxed mb-6">Your deposit funds an organization that stands for everything you're against. You choose which one.</p>
+                    <div class="flex items-center justify-between pt-4 border-t border-dark-border">
+                        <span class="font-mono text-xs text-muted">Existential dread: 10/10</span>
+                        <span class="text-crimson text-sm font-mono group-hover:translate-x-1 transition-transform">SELECT →</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 3: THE BITE MECHANISM -->
+    <section id="bite" class="relative py-24 md:py-32">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_left,rgba(0,240,255,0.04)_0%,transparent_60%)]"></div>
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="mb-16">
+                <div class="font-mono text-xs text-cyan uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
+                    <span class="inline-block w-2 h-2 bg-cyan rounded-full animate-pulse"></span>
+                    THE BITE MECHANISM
+                </div>
+                <h2 class="font-serif text-3xl sm:text-4xl lg:text-5xl mb-4">
+                    Promise. Fail. <span class="text-crimson crimson-glow">Pay.</span>
+                </h2>
+                <p class="text-neutral-400 max-w-2xl text-lg">Morkis watches your Monzo feed in real-time. The moment you break your word, the capture is instant.</p>
+            </div>
+
+            <!-- Dual Pane Dashboard -->
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Left: The Promise -->
+                <div class="bg-dark-card border border-cyan/20 rounded-sm overflow-hidden cyan-box-glow">
+                    <div class="px-6 py-4 border-b border-dark-border flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 bg-cyan rounded-full"></span>
+                            <span class="font-mono text-xs text-cyan uppercase tracking-widest">The Promise</span>
+                        </div>
+                        <span class="font-mono text-[10px] text-muted">SIGNED · 2024-01-15T09:22:00Z</span>
+                    </div>
+                    <div class="p-6 md:p-8">
+                        <div class="border border-dark-border bg-base/80 rounded-sm p-6 mb-6">
+                            <div class="font-mono text-[10px] text-muted uppercase tracking-widest mb-4">DIGITAL CONTRACT #MK-4491</div>
+                            <p class="font-serif text-xl text-white leading-relaxed mb-4">
+                                "I will not spend more than <span class="text-cyan font-bold">€40</span> on takeout this week."
+                            </p>
+                            <div class="flex items-center gap-3 pt-4 border-t border-dark-border">
+                                <div class="w-8 h-8 bg-cyan/10 rounded-full flex items-center justify-center text-cyan text-xs font-bold">JK</div>
+                                <div>
+                                    <div class="font-mono text-sm text-white">Jay Keller</div>
+                                    <div class="font-mono text-[10px] text-muted">Verified via Monzo Open Banking</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-base/50 border border-dark-border rounded-sm p-4">
+                                <div class="font-mono text-[10px] text-muted uppercase mb-1">Stake Amount</div>
+                                <div class="font-mono text-lg text-white">€50.00</div>
+                            </div>
+                            <div class="bg-base/50 border border-dark-border rounded-sm p-4">
+                                <div class="font-mono text-[10px] text-muted uppercase mb-1">Capture Method</div>
+                                <div class="font-mono text-lg text-cyan">Manual</div>
+                            </div>
+                            <div class="bg-base/50 border border-dark-border rounded-sm p-4">
+                                <div class="font-mono text-[10px] text-muted uppercase mb-1">Nemesis</div>
+                                <div class="font-mono text-lg text-crimson">The Rival</div>
+                            </div>
+                            <div class="bg-base/50 border border-dark-border rounded-sm p-4">
+                                <div class="font-mono text-[10px] text-muted uppercase mb-1">Status</div>
+                                <div class="font-mono text-lg text-white flex items-center gap-2">
+                                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                                    Active
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: The Reality -->
+                <div class="bg-dark-card border border-dark-border rounded-sm overflow-hidden relative" id="reality-pane">
+                    <div class="px-6 py-4 border-b border-dark-border flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 bg-white rounded-full"></span>
+                            <span class="font-mono text-xs text-white uppercase tracking-widest">Monzo Feed — Live</span>
+                        </div>
+                        <span class="font-mono text-[10px] text-muted">WEBHOOK: transaction.created</span>
+                    </div>
+                    <div class="p-6 md:p-8 space-y-3">
+                        <!-- Normal transactions -->
+                        <div class="flex items-center justify-between py-3 border-b border-dark-border/50">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 bg-neutral-800 rounded-full flex items-center justify-center text-sm">🏪</div>
+                                <div>
+                                    <div class="font-mono text-sm text-neutral-300">Tesco Express</div>
+                                    <div class="font-mono text-[10px] text-muted">Mon · Groceries</div>
+                                </div>
+                            </div>
+                            <span class="font-mono text-sm text-neutral-400">-€12.40</span>
+                        </div>
+                        <div class="flex items-center justify-between py-3 border-b border-dark-border/50">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 bg-neutral-800 rounded-full flex items-center justify-center text-sm">☕</div>
+                                <div>
+                                    <div class="font-mono text-sm text-neutral-300">Starbucks</div>
+                                    <div class="font-mono text-[10px] text-muted">Tue · Eating Out</div>
+                                </div>
+                            </div>
+                            <span class="font-mono text-sm text-neutral-400">-€5.80</span>
+                        </div>
+                        <div class="flex items-center justify-between py-3 border-b border-dark-border/50">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 bg-neutral-800 rounded-full flex items-center justify-center text-sm">🍕</div>
+                                <div>
+                                    <div class="font-mono text-sm text-neutral-300">Domino's Pizza</div>
+                                    <div class="font-mono text-[10px] text-muted">Wed · Eating Out</div>
+                                </div>
+                            </div>
+                            <span class="font-mono text-sm text-neutral-400">-€18.90</span>
+                        </div>
+
+                        <!-- DANGER Transaction -->
+                        <div id="danger-transaction" class="flex items-center justify-between py-3 px-4 -mx-4 bg-crimson/5 border border-crimson/30 rounded-sm relative pulse-ring cursor-pointer">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 bg-crimson/20 rounded-full flex items-center justify-center text-sm">🍔</div>
+                                <div>
+                                    <div class="font-mono text-sm text-crimson font-bold">UberEats</div>
+                                    <div class="font-mono text-[10px] text-crimson/60">Thu 01:47 AM · Eating Out · LIMIT BREACHED</div>
+                                </div>
+                            </div>
+                            <span class="font-mono text-sm text-crimson font-bold">-€42.50</span>
+                        </div>
+
+                        <!-- Running Total -->
+                        <div class="pt-4 mt-2 border-t border-dark-border flex items-center justify-between">
+                            <span class="font-mono text-xs text-muted uppercase">Weekly Takeout Total</span>
+                            <div class="text-right">
+                                <span class="font-mono text-sm text-crimson font-bold">€67.30</span>
+                                <span class="font-mono text-xs text-muted"> / €40.00 limit</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Capture Overlay -->
+                    <div id="capture-overlay" class="absolute inset-0 bg-base/95 backdrop-blur-sm flex items-center justify-center p-8 hidden">
+                        <div class="text-center capture-animate">
+                            <div class="text-6xl mb-4">👹</div>
+                            <div class="font-mono text-xs text-crimson uppercase tracking-[0.3em] mb-4 font-bold">MORKIS HAS BITTEN</div>
+                            <div class="bg-dark-card border border-crimson/30 rounded-sm p-6 max-w-xs mx-auto crimson-box-glow">
+                                <div class="font-mono text-[10px] text-muted uppercase mb-3 tracking-widest">STRIPE CAPTURE RECEIPT</div>
+                                <div class="font-mono text-3xl text-crimson font-bold mb-2">€50.00</div>
+                                <div class="font-mono text-xs text-neutral-400 mb-4">Payment captured & transferred</div>
+                                <div class="border-t border-dark-border pt-3">
+                                    <div class="font-mono text-[10px] text-muted uppercase mb-1">Recipient</div>
+                                    <div class="font-mono text-sm text-crimson">⚽ The Rival Supporters' Fund</div>
+                                </div>
+                                <div class="border-t border-dark-border pt-3 mt-3">
+                                    <div class="font-mono text-[10px] text-muted uppercase mb-1">Payment Intent</div>
+                                    <div class="font-mono text-[11px] text-muted">pi_3MtwBwLkdIwHu7ix28aiMK4e</div>
+                                </div>
+                            </div>
+                            <button onclick="document.getElementById('capture-overlay').classList.add('hidden')" class="mt-6 font-mono text-xs text-muted hover:text-white transition-colors uppercase tracking-widest">
+                                DISMISS
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 4: THE ORACLE -->
+    <section id="oracle" class="relative py-24 md:py-32">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(0,240,255,0.03)_0%,transparent_60%)]"></div>
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="grid md:grid-cols-5 gap-12 items-start">
+                <div class="md:col-span-2">
+                    <div class="font-mono text-xs text-cyan uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
+                        <span class="inline-block w-2 h-2 bg-cyan rounded-full animate-pulse"></span>
+                        THE ORACLE
+                    </div>
+                    <h2 class="font-serif text-3xl sm:text-4xl lg:text-5xl mb-6">
+                        Integrity <span class="text-cyan cyan-glow">Volatility.</span>
+                    </h2>
+                    <p class="text-neutral-400 text-lg leading-relaxed mb-6">
+                        Our Susquehanna-inspired data engine analyzes your last 6 months of Monzo transactions to predict your <span class="text-white font-medium">"Flake Probability."</span>
+                    </p>
+                    <p class="text-neutral-400 leading-relaxed mb-8">
+                        If you're a chronic procrastinator, <span class="text-crimson">Morkis raises the stakes.</span> Your stake multiplier adjusts dynamically based on your historical pattern of broken promises.
+                    </p>
+                    <!-- Data points -->
+                    <div class="space-y-4">
+                        <div class="bg-dark-card border border-dark-border rounded-sm p-4 flex items-center justify-between">
+                            <div>
+                                <div class="font-mono text-[10px] text-muted uppercase tracking-wider">Flake Probability</div>
+                                <div class="font-mono text-sm text-white mt-1">Based on 847 transactions</div>
+                            </div>
+                            <div class="font-mono text-2xl text-crimson font-bold">78%</div>
+                        </div>
+                        <div class="bg-dark-card border border-dark-border rounded-sm p-4 flex items-center justify-between">
+                            <div>
+                                <div class="font-mono text-[10px] text-muted uppercase tracking-wider">Stake Multiplier</div>
+                                <div class="font-mono text-sm text-white mt-1">Auto-adjusted by Oracle</div>
+                            </div>
+                            <div class="font-mono text-2xl text-cyan font-bold">2.4x</div>
+                        </div>
+                        <div class="bg-dark-card border border-dark-border rounded-sm p-4 flex items-center justify-between">
+                            <div>
+                                <div class="font-mono text-[10px] text-muted uppercase tracking-wider">Weak Day</div>
+                                <div class="font-mono text-sm text-white mt-1">Highest failure correlation</div>
+                            </div>
+                            <div class="font-mono text-2xl text-white font-bold">THU</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graph -->
+                <div class="md:col-span-3">
+                    <div class="bg-dark-card border border-dark-border rounded-sm overflow-hidden scanline-overlay">
+                        <div class="px-6 py-4 border-b border-dark-border flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 bg-cyan rounded-full animate-pulse"></span>
+                                <span class="font-mono text-xs text-cyan uppercase tracking-widest">Integrity Volatility Index</span>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span class="font-mono text-[10px] text-muted">6M</span>
+                                <span class="font-mono text-[10px] text-cyan border-b border-cyan pb-0.5">1Y</span>
+                                <span class="font-mono text-[10px] text-muted">ALL</span>
+                            </div>
+                        </div>
+                        <div class="p-6 md:p-8">
+                            <svg id="integrity-graph" viewBox="0 0 600 300" class="w-full" xmlns="http://www.w3.org/2000/svg">
+                                <!-- Grid -->
+                                <line x1="0" y1="60" x2="600" y2="60" stroke="#1a1a1a" stroke-width="1"/>
+                                <line x1="0" y1="120" x2="600" y2="120" stroke="#1a1a1a" stroke-width="1"/>
+                                <line x1="0" y1="180" x2="600" y2="180" stroke="#1a1a1a" stroke-width="1"/>
+                                <line x1="0" y1="240" x2="600" y2="240" stroke="#1a1a1a" stroke-width="1"/>
+
+                                <!-- Y-axis labels -->
+                                <text x="4" y="58" fill="#555" font-family="JetBrains Mono" font-size="9">100%</text>
+                                <text x="4" y="118" fill="#555" font-family="JetBrains Mono" font-size="9">75%</text>
+                                <text x="4" y="178" fill="#555" font-family="JetBrains Mono" font-size="9">50%</text>
+                                <text x="4" y="238" fill="#555" font-family="JetBrains Mono" font-size="9">25%</text>
+
+                                <!-- Gradient fill under line -->
+                                <defs>
+                                    <linearGradient id="graphFill" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#00F0FF" stop-opacity="0.15"/>
+                                        <stop offset="100%" stop-color="#FF003C" stop-opacity="0.05"/>
+                                    </linearGradient>
+                                    <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
+                                        <stop offset="0%" stop-color="#00F0FF"/>
+                                        <stop offset="70%" stop-color="#00F0FF"/>
+                                        <stop offset="100%" stop-color="#FF003C"/>
+                                    </linearGradient>
+                                </defs>
+
+                                <!-- Area -->
+                                <path d="M 40 200 C 80 180, 100 160, 130 170 S 180 120, 220 140 S 260 100, 300 130 S 350 90, 380 110 S 420 80, 450 150 S 500 200, 540 220 S 570 250, 590 260 L 590 280 L 40 280 Z" fill="url(#graphFill)"/>
+
+                                <!-- Line -->
+                                <path d="M 40 200 C 80 180, 100 160, 130 170 S 180 120, 220 140 S 260 100, 300 130 S 350 90, 380 110 S 420 80, 450 150 S 500 200, 540 220 S 570 250, 590 260" fill="none" stroke="url(#lineGrad)" stroke-width="2.5" stroke-linecap="round"/>
+
+                                <!-- Data points -->
+                                <circle cx="130" cy="170" r="3" fill="#00F0FF"/>
+                                <circle cx="220" cy="140" r="3" fill="#00F0FF"/>
+                                <circle cx="300" cy="130" r="3" fill="#00F0FF"/>
+                                <circle cx="380" cy="110" r="4" fill="#00F0FF"/>
+                                <circle cx="450" cy="150" r="3" fill="#FF003C" opacity="0.7"/>
+                                <circle cx="540" cy="220" r="3" fill="#FF003C" opacity="0.8"/>
+                                <circle cx="590" cy="260" r="5" fill="#FF003C">
+                                    <animate attributeName="r" values="4;7;4" dur="2s" repeatCount="indefinite"/>
+                                    <animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite"/>
+                                </circle>
+
+                                <!-- "You are here" label -->
+                                <line x1="590" y1="260" x2="590" y2="40" stroke="#FF003C" stroke-width="1" stroke-dasharray="3,3" opacity="0.4"/>
+                                <rect x="530" y="28" width="68" height="20" rx="2" fill="#FF003C" opacity="0.15" stroke="#FF003C" stroke-width="0.5"/>
+                                <text x="540" y="42" fill="#FF003C" font-family="JetBrains Mono" font-size="9" font-weight="bold">YOU ARE HERE</text>
+
+                                <!-- X-axis labels -->
+                                <text x="40" y="295" fill="#555" font-family="JetBrains Mono" font-size="9">JUL</text>
+                                <text x="130" y="295" fill="#555" font-family="JetBrains Mono" font-size="9">AUG</text>
+                                <text x="220" y="295" fill="#555" font-family="JetBrains Mono" font-size="9">SEP</text>
+                                <text x="300" y="295" fill="#555" font-family="JetBrains Mono" font-size="9">OCT</text>
+                                <text x="380" y="295" fill="#555" font-family="JetBrains Mono" font-size="9">NOV</text>
+                                <text x="450" y="295" fill="#555" font-family="JetBrains Mono" font-size="9">DEC</text>
+                                <text x="540" y="295" fill="#FF003C" font-family="JetBrains Mono" font-size="9" font-weight="bold">JAN</text>
+                            </svg>
+
+                            <!-- Glitch detail -->
+                            <div class="mt-6 flex items-center justify-between text-muted">
+                                <div class="font-mono text-[10px] uppercase tracking-widest glitch-text">
+                                    ENGINE: SUSTEHANNA_v4.2 · LATENCY: 12ms
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="w-1.5 h-1.5 bg-crimson rounded-full animate-pulse"></span>
+                                    <span class="font-mono text-[10px] text-crimson uppercase">DECLINING INTEGRITY</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 5: THE ROAST -->
+    <section id="roast" class="relative py-24 md:py-32">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,0,60,0.04)_0%,transparent_50%)]"></div>
+        <div class="max-w-4xl mx-auto px-6 relative z-10 text-center">
+            <div class="font-mono text-xs text-crimson uppercase tracking-[0.3em] mb-4 flex items-center gap-2 justify-center">
+                <span class="inline-block w-2 h-2 bg-crimson rounded-full animate-pulse"></span>
+                THE ROAST · ELEVENLABS INTEGRATION
+            </div>
+            <h2 class="font-serif text-3xl sm:text-4xl lg:text-5xl mb-4">
+                Hear your <span class="text-crimson crimson-glow">failure.</span>
+            </h2>
+            <p class="text-neutral-400 text-lg mb-12 max-w-lg mx-auto">
+                Morkis delivers personalized voice roasts via ElevenLabs. Posh. Malicious. Unforgettable.
+            </p>
+
+            <!-- Waveform Card -->
+            <div class="bg-dark-card border border-crimson/20 rounded-sm p-8 md:p-12 crimson-box-glow max-w-2xl mx-auto">
+                <!-- Voice Label -->
+                <div class="flex items-center justify-between mb-8">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-crimson/10 rounded-full flex items-center justify-center">
+                            <span class="text-lg">👹</span>
+                        </div>
+                        <div class="text-left">
+                            <div class="font-mono text-sm text-white">Morkis Voice Agent</div>
+                            <div class="font-mono text-[10px] text-muted">ElevenLabs · "Posh but Malicious"</div>
+                        </div>
+                    </div>
+                    <div class="font-mono text-[10px] text-muted uppercase tracking-widest">00:08</div>
+                </div>
+
+                <!-- Waveform Visualizer -->
+                <div id="waveform" class="flex items-center justify-center gap-[3px] h-24 mb-8 cursor-pointer" onclick="toggleWaveform()">
+                    <!-- Generated by JS -->
+                </div>
+
+                <!-- Transcript -->
+                <div class="bg-base/60 border border-dark-border rounded-sm p-6 text-left">
+                    <div class="font-mono text-[10px] text-muted uppercase tracking-widest mb-3">TRANSCRIPT</div>
+                    <p class="font-serif text-lg text-neutral-300 leading-relaxed italic">
+                        "I saw that 3 AM kebab, Jay. Your rival team just got <span class="text-crimson font-bold not-italic">€20 richer</span> thanks to your lack of discipline. <span class="text-crimson">Pathetic.</span>"
+                    </p>
+                </div>
+
+                <!-- Play Button -->
+                <button id="play-btn" onclick="toggleWaveform()" class="mt-8 px-8 py-3 bg-crimson/10 border border-crimson/30 text-crimson font-mono text-sm uppercase tracking-widest hover:bg-crimson/20 transition-all duration-300 rounded-sm inline-flex items-center gap-3 hover:shadow-[0_0_30px_rgba(255,0,60,0.2)]">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><polygon points="3,1 13,8 3,15"/></svg>
+                    PLAY ROAST
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 6: THE WAR ROOM -->
+    <section id="warroom" class="relative py-24 md:py-32">
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="mb-16 text-center">
+                <div class="font-mono text-xs text-cyan uppercase tracking-[0.3em] mb-4 flex items-center gap-2 justify-center">
+                    <span class="inline-block w-2 h-2 bg-cyan rounded-full animate-pulse"></span>
+                    THE WAR ROOM · MIRO AI
+                </div>
+                <h2 class="font-serif text-3xl sm:text-4xl lg:text-5xl mb-4">
+                    Your habits, <span class="text-cyan cyan-glow">dissected.</span>
+                </h2>
+                <p class="text-neutral-400 text-lg max-w-lg mx-auto">
+                    Miro AI clusters your spending patterns into two categories. Choose which side you're on.
+                </p>
+            </div>
+
+            <!-- Miro Board Simulation -->
+            <div class="bg-dark-card border border-dark-border rounded-sm overflow-hidden">
+                <div class="px-6 py-4 border-b border-dark-border flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="flex gap-1.5">
+                            <span class="w-3 h-3 rounded-full bg-crimson/60"></span>
+                            <span class="w-3 h-3 rounded-full bg-yellow-500/60"></span>
+                            <span class="w-3 h-3 rounded-full bg-green-500/60"></span>
+                        </div>
+                        <span class="font-mono text-xs text-muted">Miro — Jay's Habit Board</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-6 h-6 bg-cyan/20 rounded-full flex items-center justify-center text-[10px] text-cyan font-bold">AI</span>
+                        <span class="font-mono text-[10px] text-cyan uppercase">Clustering Active</span>
+                    </div>
+                </div>
+
+                <div class="p-6 md:p-10 grid md:grid-cols-2 gap-8" style="background: radial-gradient(circle at 50% 50%, #0a0a0a 0%, #080808 100%); background-image: radial-gradient(circle, #151515 1px, transparent 1px); background-size: 24px 24px;">
+                    <!-- Wealth Builders Column -->
+                    <div>
+                        <div class="font-mono text-xs text-cyan uppercase tracking-[0.3em] mb-6 text-center flex items-center justify-center gap-2">
+                            <span class="w-3 h-0.5 bg-cyan"></span>
+                            WEALTH BUILDERS
+                            <span class="w-3 h-0.5 bg-cyan"></span>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="bg-cyan/5 border border-cyan/20 rounded-sm p-4 hover-lift cursor-pointer transform -rotate-1">
+                                <div class="font-mono text-sm text-cyan">💪 Gym Membership</div>
+                                <div class="font-mono text-[10px] text-muted mt-1">€29.99/mo · 94% attendance</div>
+                            </div>
+                            <div class="bg-cyan/5 border border-cyan/20 rounded-sm p-4 hover-lift cursor-pointer transform rotate-1">
+                                <div class="font-mono text-sm text-cyan">📚 Audible Subscription</div>
+                                <div class="font-mono text-[10px] text-muted mt-1">€9.99/mo · 12 books completed</div>
+                            </div>
+                            <div class="bg-cyan/5 border border-cyan/20 rounded-sm p-4 hover-lift cursor-pointer transform -rotate-0.5">
+                                <div class="font-mono text-sm text-cyan">🏦 Savings Transfer</div>
+                                <div class="font-mono text-[10px] text-muted mt-1">€200/mo · Automated</div>
+                            </div>
+                            <div class="bg-cyan/5 border border-cyan/20 rounded-sm p-4 hover-lift cursor-pointer transform rotate-0.5">
+                                <div class="font-mono text-sm text-cyan">🥗 Meal Prep Sunday</div>
+                                <div class="font-mono text-[10px] text-muted mt-1">€35/wk · Consistent 3 months</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Morkis Food Column -->
+                    <div>
+                        <div class="font-mono text-xs text-crimson uppercase tracking-[0.3em] mb-6 text-center flex items-center justify-center gap-2">
+                            <span class="w-3 h-0.5 bg-crimson"></span>
+                            MORKIS FOOD
+                            <span class="w-3 h-0.5 bg-crimson"></span>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="bg-crimson/5 border border-crimson/20 rounded-sm p-4 hover-lift cursor-pointer transform rotate-1">
+                                <div class="font-mono text-sm text-crimson">🍕 Late Night Deliveroo</div>
+                                <div class="font-mono text-[10px] text-muted mt-1">€180/mo · 73% after midnight</div>
+                            </div>
+                            <div class="bg-crimson/5 border border-crimson/20 rounded-sm p-4 hover-lift cursor-pointer transform -rotate-1">
+                                <div class="font-mono text-sm text-crimson">🍺 Pub Fridays</div>
+                                <div class="font-mono text-[10px] text-muted mt-1">€120/mo · Always exceeds €40 limit</div>
+                            </div>
+                            <div class="bg-crimson/5 border border-crimson/20 rounded-sm p-4 hover-lift cursor-pointer transform rotate-0.5">
+                                <div class="font-mono text-sm text-crimson">🛒 Impulse Amazon</div>
+                                <div class="font-mono text-[10px] text-muted mt-1">€95/mo · 60% items unused</div>
+                            </div>
+                            <div class="bg-crimson/5 border border-crimson/20 rounded-sm p-4 hover-lift cursor-pointer transform -rotate-0.5">
+                                <div class="font-mono text-sm text-crimson">☕ Triple Oat Lattes</div>
+                                <div class="font-mono text-[10px] text-muted mt-1">€65/mo · "I deserve it" tax</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer bar -->
+                <div class="px-6 py-3 border-t border-dark-border bg-base/50 flex items-center justify-between">
+                    <div class="font-mono text-[10px] text-muted">AI Confidence: <span class="text-cyan">94.7%</span> · Last Updated: 2 minutes ago</div>
+                    <div class="font-mono text-[10px] text-muted">Powered by <span class="text-white">Miro Intelligent Canvas</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA SECTION -->
+    <section class="relative py-24 md:py-32 overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,240,255,0.08)_0%,transparent_60%)]"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(255,0,60,0.05)_0%,transparent_40%)]"></div>
+        <div class="max-w-3xl mx-auto px-6 relative z-10 text-center">
+            <div class="text-7xl mb-8">👹</div>
+            <h2 class="font-serif text-3xl sm:text-4xl lg:text-5xl mb-6 leading-tight">
+                A cold digital mirror that stakes your fortune on the person you <span class="text-cyan cyan-glow">pretend to be.</span>
+            </h2>
+            <p class="text-neutral-400 text-lg mb-10 max-w-xl mx-auto leading-relaxed">
+                If your bank data proves you lied, the monster eats your deposit and sends it to your worst enemy.
+            </p>
+            <button class="group relative px-12 py-5 bg-cyan text-base font-mono font-bold text-sm uppercase tracking-[0.2em] hover:shadow-[0_0_60px_rgba(0,240,255,0.4)] transition-all duration-500 overflow-hidden">
+                <span class="relative z-10">FACE THE MONSTER</span>
+                <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+            </button>
+            <div class="mt-6 font-mono text-[10px] text-muted uppercase tracking-[0.3em]">
+                No escape. No refunds. No mercy.
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-dark-border py-12">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">👹</span>
+                    <span class="font-serif text-lg text-cyan">MORKIS</span>
+                    <span class="font-mono text-[10px] text-muted ml-2">Swedish for "Moral Hangover"</span>
+                </div>
+                <div class="flex items-center gap-6 font-mono text-[10px] text-muted uppercase tracking-widest">
+                    <span>Monzo</span>
+                    <span class="text-dark-border">·</span>
+                    <span>Stripe</span>
+                    <span class="text-dark-border">·</span>
+                    <span>ElevenLabs</span>
+                    <span class="text-dark-border">·</span>
+                    <span>Miro AI</span>
+                </div>
+                <div class="font-mono text-[10px] text-muted">
+                    Built with 🦷 at HackEurope 2025
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ============ EYE TRACKING ============
+        const mascotContainer = document.getElementById('mascot-container');
+        const leftIris = document.getElementById('left-iris');
+        const leftPupil = document.getElementById('left-pupil');
+        const rightIris = document.getElementById('right-iris');
+        const rightPupil = document.getElementById('right-pupil');
+
+        const leftEyeCenter = { x: 145, y: 225 };
+        const rightEyeCenter = { x: 235, y: 225 };
+        const maxOffset = 10;
+
+        let targetLeftOffset = { x: 0, y: 0 };
+        let targetRightOffset = { x: 0, y: 0 };
+        let currentLeftOffset = { x: 0, y: 0 };
+        let currentRightOffset = { x: 0, y: 0 };
+
+        document.addEventListener('mousemove', (e) => {
+            if (!mascotContainer) return;
+            const rect = mascotContainer.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            const deltaX = e.clientX - centerX;
+            const deltaY = e.clientY - centerY;
+            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            const clampedDistance = Math.min(distance, 400);
+
+            const factor = clampedDistance / 400;
+            const angle = Math.atan2(deltaY, deltaX);
+
+            const offsetX = Math.cos(angle) * maxOffset * factor;
+            const offsetY = Math.sin(angle) * maxOffset * factor;
+
+            targetLeftOffset = { x: offsetX, y: offsetY };
+            targetRightOffset = { x: offsetX, y: offsetY };
+        });
+
+        function animateEyes() {
+            const lerp = 0.12;
+            currentLeftOffset.x += (targetLeftOffset.x - currentLeftOffset.x) * lerp;
+            currentLeftOffset.y += (targetLeftOffset.y - currentLeftOffset.y) * lerp;
+            currentRightOffset.x += (targetRightOffset.x - currentRightOffset.x) * lerp;
+            currentRightOffset.y += (targetRightOffset.y - currentRightOffset.y) * lerp;
+
+            if (leftIris && leftPupil) {
+                leftIris.setAttribute('cx', leftEyeCenter.x + currentLeftOffset.x);
+                leftIris.setAttribute('cy', leftEyeCenter.y + currentLeftOffset.y);
+                leftPupil.setAttribute('cx', leftEyeCenter.x + currentLeftOffset.x);
+                leftPupil.setAttribute('cy', leftEyeCenter.y + currentLeftOffset.y);
+            }
+            if (rightIris && rightPupil) {
+                rightIris.setAttribute('cx', rightEyeCenter.x + currentRightOffset.x);
+                rightIris.setAttribute('cy', rightEyeCenter.y + currentRightOffset.y);
+                rightPupil.setAttribute('cx', rightEyeCenter.x + currentRightOffset.x);
+                rightPupil.setAttribute('cy', rightEyeCenter.y + currentRightOffset.y);
+            }
+
+            requestAnimationFrame(animateEyes);
+        }
+        animateEyes();
+
+        // ============ WAVEFORM GENERATOR ============
+        const waveformContainer = document.getElementById('waveform');
+        const barCount = 80;
+        let isPlaying = false;
+
+        for (let i = 0; i < barCount; i++) {
+            const bar = document.createElement('div');
+            bar.className = 'rounded-full transition-all duration-150';
+            bar.style.width = '3px';
+            bar.style.height = '8px';
+            bar.style.backgroundColor = i < barCount * 0.3 ? '#FF003C' : (i < barCount * 0.65 ? '#FF003C88' : '#FF003C44');
+            bar.style.minHeight = '4px';
+            waveformContainer.appendChild(bar);
+        }
+
+        function toggleWaveform() {
+            isPlaying = !isPlaying;
+            const bars = waveformContainer.children;
+            const btn = document.getElementById('play-btn');
+
+            if (isPlaying) {
+                btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="1" width="4" height="14"/><rect x="10" y="1" width="4" height="14"/></svg> PLAYING...';
+                animateWaveform();
+            } else {
+                btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><polygon points="3,1 13,8 3,15"/></svg> PLAY ROAST';
+                for (let bar of bars) {
+                    bar.style.height = '8px';
+                }
+            }
+        }
+
+        function animateWaveform() {
+            if (!isPlaying) return;
+            const bars = waveformContainer.children;
+            for (let i = 0; i < bars.length; i++) {
+                const height = Math.random() * 80 + 8;
+                bars[i].style.height = height + 'px';
+            }
+            setTimeout(() => requestAnimationFrame(animateWaveform), 100);
+        }
+
+        // ============ CAPTURE ANIMATION ============
+        const dangerTx = document.getElementById('danger-transaction');
+        const captureOverlay = document.getElementById('capture-overlay');
+
+        dangerTx.addEventListener('click', () => {
+            captureOverlay.classList.remove('hidden');
+        });
+
+        // ============ SCROLL ANIMATIONS ============
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section > div').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'opacity 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            observer.observe(el);
+        });
+
+        // Fix first section visibility
+        setTimeout(() => {
+            document.querySelector('section > div').style.opacity = '1';
+            document.querySelector('section > div').style.transform = 'translateY(0)';
+        }, 100);
+
+        // ============ NAVBAR SCROLL EFFECT ============
+        const nav = document.querySelector('nav');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                nav.style.borderBottomColor = 'rgba(0,240,255,0.1)';
+            } else {
+                nav.style.borderBottomColor = '#1a1a1a';
+            }
+        });
+    </script>
+</body>
+</html>
