@@ -650,6 +650,9 @@
 
 <script>
     let currentScreen = 'screen-home';
+    let failureRoastAudio = null;
+    let failureRoastUrl = null;
+    let failureRoastLoading = false;
 
     function goTo(id) {
         document.getElementById(currentScreen)?.classList.remove('active');
@@ -676,6 +679,71 @@
         // Show/hide mobile tabs on all main screens
         const showTabs = ['screen-home','screen-contract','screen-group','screen-shop','screen-bite'];
         document.getElementById('mobile-tabs').style.display = showTabs.includes(id) ? 'flex' : 'none';
+
+        if (id === 'screen-bite') {
+            playFailureRoast(true);
+        }
+    }
+
+    function setFailureRoastStatus(message) {
+        const statusEl = document.getElementById('failure-roast-status');
+        if (statusEl) statusEl.textContent = message;
+    }
+
+    function setFailureRoastButton(message, disabled = false) {
+        const btn = document.getElementById('failure-roast-btn');
+        if (!btn) return;
+        btn.disabled = disabled;
+        btn.innerHTML = `<i data-lucide="volume-2" class="w-4 h-4 inline mr-1"></i> ${message}`;
+        lucide.createIcons();
+    }
+
+    async function playFailureRoast(auto = false) {
+        if (failureRoastLoading) return;
+        failureRoastLoading = true;
+        setFailureRoastButton('Loading Roast...', true);
+        setFailureRoastStatus('Contacting ElevenLabs...');
+
+        try {
+            if (failureRoastAudio) {
+                failureRoastAudio.pause();
+                failureRoastAudio.currentTime = 0;
+            }
+            if (failureRoastUrl) {
+                URL.revokeObjectURL(failureRoastUrl);
+                failureRoastUrl = null;
+            }
+
+            const response = await fetch('/api/failure-roast', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_name: 'Erik',
+                    failed_goal: 'No Wolt this week',
+                    amount: '€30'
+                })
+            });
+
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                throw new Error(err.error || err.detail || 'Failed to generate roast');
+            }
+
+            const blob = await response.blob();
+            failureRoastUrl = URL.createObjectURL(blob);
+            failureRoastAudio = new Audio(failureRoastUrl);
+            await failureRoastAudio.play();
+            setFailureRoastStatus('Now playing');
+            setFailureRoastButton('Replay AI Roast');
+        } catch (error) {
+            setFailureRoastStatus(`Voice unavailable: ${error.message}`);
+            setFailureRoastButton('Play AI Roast');
+            if (!auto) {
+                console.error(error);
+            }
+        } finally {
+            failureRoastLoading = false;
+        }
     }
 
     function updateStake(v) {
