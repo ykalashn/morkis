@@ -733,24 +733,27 @@
             <div class="bg-white rounded-2xl border-2 border-ink/10 p-8 relative">
                 <button onclick="closeWaitlist()" class="absolute top-4 right-4 text-ink/30 hover:text-ink text-xl leading-none">&times;</button>
                 
-                <div class="text-center mb-6">
-                    <img src="https://res.cloudinary.com/yevhenii-kalashnyk/image/upload/e_background_removal/c_fill,ar_3:4,g_auto,f_png/v1771693879/Gemini_Generated_Image_3goprg3goprg3gop_l9flik.png" alt="Morkis" class="w-16 h-20 object-contain mx-auto mb-4">
-                    <h3 class="font-display text-2xl font-800 text-ink mb-2">Join the Waitlist</h3>
-                    <p class="font-body text-sm text-ink/50">Morkis is currently in prototype stage. Sign up and we'll keep you informed on all future progress.</p>
+                <div id="waitlist-content">
+                    <div class="text-center mb-6">
+                        <img src="https://res.cloudinary.com/yevhenii-kalashnyk/image/upload/e_background_removal/c_fill,ar_3:4,g_auto,f_png/v1771693879/Gemini_Generated_Image_3goprg3goprg3gop_l9flik.png" alt="Morkis" class="w-16 h-20 object-contain mx-auto mb-4">
+                        <h3 class="font-display text-2xl font-800 text-ink mb-2">Join the Waitlist</h3>
+                        <p class="font-body text-sm text-ink/50">Morkis is currently in prototype stage. Sign up and we'll keep you informed on all future progress.</p>
+                    </div>
+
+                    <form id="waitlist-form" name="waitlist" netlify onsubmit="submitWaitlist(event)">
+                        <input type="hidden" name="form-name" value="waitlist">
+                        <input type="email" id="waitlist-email" name="email" required
+                            class="w-full bg-cream border-2 border-ink/10 rounded-xl px-4 py-3 font-body text-base text-ink placeholder:text-ink/30 focus:border-pop focus:outline-none transition-colors mb-4"
+                            placeholder="your@email.com">
+                        <button type="submit" class="btn-fun w-full px-6 py-4 bg-pop text-white text-sm uppercase tracking-widest">
+                            Sign Me Up
+                        </button>
+                    </form>
                 </div>
 
-                <form id="waitlist-form" name="waitlist" method="POST" data-netlify="true" onsubmit="submitWaitlist(event)">
-                    <input type="hidden" name="form-name" value="waitlist">
-                    <input type="email" id="waitlist-email" name="email" required
-                        class="w-full bg-cream border-2 border-ink/10 rounded-xl px-4 py-3 font-body text-base text-ink placeholder:text-ink/30 focus:border-pop focus:outline-none transition-colors mb-4"
-                        placeholder="your@email.com">
-                    <button type="submit" class="btn-fun w-full px-6 py-4 bg-pop text-white text-sm uppercase tracking-widest">
-                        Sign Me Up
-                    </button>
-                </form>
-
-                <div id="waitlist-success" class="hidden text-center py-4">
-                    <div class="font-display text-xl font-800 text-pop mb-2">You're on the list!</div>
+                <div id="waitlist-success" class="hidden text-center py-6">
+                    <img src="https://res.cloudinary.com/yevhenii-kalashnyk/image/upload/e_background_removal/c_fill,ar_3:4,g_auto,f_png/v1771693879/Gemini_Generated_Image_3goprg3goprg3gop_l9flik.png" alt="Morkis" class="w-16 h-20 object-contain mx-auto mb-4">
+                    <div class="font-display text-2xl font-800 text-pop mb-2">You're on the list!</div>
                     <p class="font-body text-sm text-ink/50">We'll be in touch when Morkis is ready to bite.</p>
                 </div>
 
@@ -892,19 +895,19 @@
             document.body.style.paddingRight = '';
             document.querySelector('nav').style.paddingRight = '';
         }
+
         function submitWaitlist(e) {
             e.preventDefault();
             const form = e.target;
-            const email = document.getElementById('waitlist-email').value;
             fetch('/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams(new FormData(form)).toString()
             }).then(() => {
-                document.getElementById('waitlist-form').classList.add('hidden');
+                document.getElementById('waitlist-content').classList.add('hidden');
                 document.getElementById('waitlist-success').classList.remove('hidden');
             }).catch(() => {
-                document.getElementById('waitlist-form').classList.add('hidden');
+                document.getElementById('waitlist-content').classList.add('hidden');
                 document.getElementById('waitlist-success').classList.remove('hidden');
             });
         }
