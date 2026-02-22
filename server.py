@@ -33,9 +33,16 @@ DATABASE = BASE_DIR / "morkis.db"
 
 app = FastAPI(title="Morkis API")
 
+_extra_origins = [
+    o.strip()
+    for o in os.getenv("ALLOWED_ORIGINS", "").split(",")
+    if o.strip()
+]
+
 allowed_origins = [
     "http://127.0.0.1:3000",
     "http://localhost:3000",
+    *_extra_origins,
 ]
 
 app.add_middleware(
