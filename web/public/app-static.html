@@ -37,7 +37,7 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-behavior: smooth; }
-        body { background: #FFFFFF; color: #3C3C3C; font-family: 'DM Sans', sans-serif; font-size: 16px; }
+        body { background: #FFFFFF; color: #3C3C3C; font-family: 'DM Sans', sans-serif; font-size: 16px; line-height: 1.45; }
 
         .screen { display: none; }
         .screen.active { display: block; }
@@ -130,13 +130,15 @@
         <div class="flex items-center gap-1">
             <button onclick="goTo('screen-home')" class="nav-link px-4 py-2 rounded-full font-display text-sm font-bold text-ink/50 hover:bg-ink/5 transition-colors" data-screen="screen-home">Home</button>
             <button onclick="goTo('screen-contract')" class="nav-link px-4 py-2 rounded-full font-display text-sm font-bold text-ink/50 hover:bg-ink/5 transition-colors" data-screen="screen-contract">New Pact</button>
+            <!-- Group tab (temporarily hidden)
             <button onclick="goTo('screen-group')" class="nav-link px-4 py-2 rounded-full font-display text-sm font-bold text-ink/50 hover:bg-ink/5 transition-colors" data-screen="screen-group">Group</button>
+            -->
             <button onclick="goTo('screen-shop')" class="nav-link px-4 py-2 rounded-full font-display text-sm font-bold text-ink/50 hover:bg-ink/5 transition-colors" data-screen="screen-shop">Shop</button>
         </div>
         <div class="flex items-center gap-3">
             <div class="card px-3 py-1 flex items-center gap-1.5" style="border-width:2px;">
-                <span class="text-sm"><i data-lucide="flame" class="w-4 h-4 text-coral inline"></i></span>
-                <span class="font-display text-sm font-extrabold">12</span>
+                <span class="font-mono text-[10px] text-muted uppercase tracking-widest">IP</span>
+                <span class="font-display text-sm font-extrabold text-moss">2,340</span>
             </div>
             <div class="w-8 h-8 bg-moss/10 border-2 border-ink rounded-full flex items-center justify-center text-xs font-bold text-moss">EK</div>
         </div>
@@ -153,10 +155,12 @@
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
         <span class="font-display text-[9px] font-bold">Pact</span>
     </div>
+    <!-- Group mobile tab (temporarily hidden)
     <div class="tab" onclick="goTo('screen-group')" data-screen="screen-group">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
         <span class="font-display text-[9px] font-bold">Group</span>
     </div>
+    -->
     <div class="tab" onclick="goTo('screen-shop')" data-screen="screen-shop">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
         <span class="font-display text-[9px] font-bold">Shop</span>
@@ -167,18 +171,17 @@
 <!-- SCREEN: HOME                     -->
 <!-- ================================ -->
 <div id="screen-home" class="screen active">
-    <div class="max-w-5xl mx-auto w-full px-5 pt-4 pb-24 md:pt-20 md:pb-12">
+    <div class="max-w-5xl mx-auto w-full px-5 pt-6 pb-28 md:pt-24 md:pb-16">
 
         <!-- Mobile greeting -->
         <div class="flex items-center justify-between mb-6 md:hidden">
             <div>
                 <div class="font-display text-xl font-extrabold">Hey, Erik</div>
-                <div class="font-body text-sm text-muted">Day 12 of being honest</div>
             </div>
             <div class="flex items-center gap-2">
                 <div class="card px-3 py-1 flex items-center gap-1.5" style="border-width:2px;">
-                    <span class="text-base"><i data-lucide="flame" class="w-4 h-4 text-coral inline"></i></span>
-                    <span class="font-display text-base font-extrabold">12</span>
+                    <span class="font-mono text-[10px] text-muted uppercase tracking-widest">IP</span>
+                    <span class="font-display text-base font-extrabold text-moss">2,340</span>
                 </div>
                 <div class="w-8 h-8 bg-moss/10 border-2 border-ink rounded-full flex items-center justify-center text-xs font-bold text-moss">EK</div>
             </div>
@@ -188,15 +191,14 @@
         <div class="hidden md:flex items-center justify-between mb-8">
             <div>
                 <div class="font-display text-3xl font-extrabold">Hey, Erik</div>
-                <div class="font-body text-base text-muted">Day 12 of being honest</div>
             </div>
         </div>
 
         <!-- Main grid: desktop 2-col, mobile stack -->
-        <div class="grid md:grid-cols-5 gap-5">
+        <div class="grid md:grid-cols-5 gap-6">
 
             <!-- Left column (3/5) -->
-            <div class="md:col-span-3 space-y-5">
+            <div class="md:col-span-3 space-y-6">
 
                 <!-- Morkis Habitat -->
                 <div class="card p-6 text-center" style="border-color: #006D5B;">
@@ -210,7 +212,6 @@
                 <div>
                     <div class="flex items-center justify-between mb-3">
                         <div class="font-display text-base font-bold uppercase tracking-widest">Active Pacts</div>
-                        <button onclick="goTo('screen-contract')" class="font-display text-sm font-bold text-moss uppercase tracking-widest">+ NEW</button>
                     </div>
                     <div class="space-y-3" id="pact-list">
                         <div class="card p-4" style="border-color: #006D5B;">
@@ -257,39 +258,33 @@
             </div>
 
             <!-- Right column (2/5) -->
-            <div class="md:col-span-2 space-y-5">
-
-                <!-- IP -->
-                <div class="flex items-center justify-between p-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-mint/20 border-2 border-moss rounded-xl flex items-center justify-center font-display text-base font-extrabold text-moss">IP</div>
-                        <div>
-                            <div class="font-display text-xl font-extrabold">2,340</div>
-                            <div class="font-mono text-xs text-muted uppercase tracking-widest">Integrity Points</div>
-                        </div>
-                    </div>
-                    <div class="font-display text-base font-bold text-moss">+180</div>
-                </div>
-
-                <!-- Trust Streak -->
-                <div class="p-4">
-                    <div class="font-display text-sm font-bold uppercase tracking-widest mb-3">Trust Streak</div>
-                    <div class="flex gap-1.5">
-                        <div class="flex-1 h-8 bg-moss rounded-lg border-2 border-ink flex items-center justify-center text-xs text-white font-bold">M</div>
-                        <div class="flex-1 h-8 bg-moss rounded-lg border-2 border-ink flex items-center justify-center text-xs text-white font-bold">T</div>
-                        <div class="flex-1 h-8 bg-moss rounded-lg border-2 border-ink flex items-center justify-center text-xs text-white font-bold">W</div>
-                        <div class="flex-1 h-8 bg-moss rounded-lg border-2 border-ink flex items-center justify-center text-xs text-white font-bold">T</div>
-                        <div class="flex-1 h-8 bg-moss/20 rounded-lg border-2 border-ink/20 flex items-center justify-center text-xs text-ink/30 font-bold">F</div>
-                        <div class="flex-1 h-8 bg-cream rounded-lg border-2 border-ink/10 flex items-center justify-center text-xs text-ink/20 font-bold">S</div>
-                        <div class="flex-1 h-8 bg-cream rounded-lg border-2 border-ink/10 flex items-center justify-center text-xs text-ink/20 font-bold">S</div>
-                    </div>
-                    <div class="mt-2 font-mono text-xs text-muted text-center">Don’t break it. Morkis gets dusty and sad.</div>
-                </div>
+            <div class="md:col-span-2 space-y-6">
 
                 <!-- Quick Actions -->
                 <div class="grid grid-cols-2 gap-3">
                     <button onclick="goTo('screen-contract')" class="btn px-3 py-3 bg-moss text-white text-sm uppercase tracking-widest">+ New Pact</button>
+                    <!-- Group quick action (temporarily hidden)
                     <button onclick="goTo('screen-group')" class="btn px-3 py-3 bg-cream text-ink border-2 border-ink/10 text-sm uppercase tracking-widest"><i data-lucide="users" class="w-4 h-4 inline mr-1"></i>Group</button>
+                    -->
+                </div>
+
+                <!-- My Nemesis Organizations -->
+                <div class="card p-4">
+                    <div class="font-display text-sm font-bold uppercase tracking-widest mb-3">My Nemesis Organizations</div>
+                    <form id="org-form" onsubmit="saveOrganization(event)" class="space-y-2">
+                        <input id="org-name" type="text" required class="w-full bg-cream border-2 border-ink/10 rounded-xl px-3 py-2.5 font-body text-sm text-ink placeholder:text-ink/30 focus:border-moss focus:outline-none transition-colors" placeholder="Name (e.g. Rival Candidate)">
+                        <div class="grid grid-cols-2 gap-2">
+                            <select id="org-type" class="w-full bg-cream border-2 border-ink/10 rounded-xl px-3 py-2.5 font-body text-sm text-ink focus:border-moss focus:outline-none transition-colors">
+                                <option value="politician">Politician</option>
+                                <option value="the_ex">The Ex</option>
+                                <option value="influencer">Influencer</option>
+                            </select>
+                            <input id="org-iban" type="text" class="w-full bg-cream border-2 border-ink/10 rounded-xl px-3 py-2.5 font-body text-sm text-ink placeholder:text-ink/30 focus:border-moss focus:outline-none transition-colors" placeholder="IBAN (optional)">
+                        </div>
+                        <input id="org-extra" type="text" class="w-full bg-cream border-2 border-ink/10 rounded-xl px-3 py-2.5 font-body text-sm text-ink placeholder:text-ink/30 focus:border-moss focus:outline-none transition-colors" placeholder="Extra info (optional)">
+                        <button type="submit" class="btn w-full px-4 py-2.5 bg-moss text-white text-xs uppercase tracking-widest">Save Organization</button>
+                    </form>
+                    <div id="org-list" class="mt-3 space-y-2"></div>
                 </div>
             </div>
         </div>
@@ -300,7 +295,7 @@
 <!-- SCREEN: NEW PACT (CONTRACT)      -->
 <!-- ================================ -->
 <div id="screen-contract" class="screen">
-    <div class="max-w-lg mx-auto w-full px-5 pt-4 pb-24 md:pt-20 md:pb-12">
+    <div class="max-w-lg mx-auto w-full px-5 pt-6 pb-28 md:pt-24 md:pb-16">
 
         <button onclick="goTo('screen-home')" class="md:hidden mb-4 card w-8 h-8 flex items-center justify-center" style="border-width:2px;">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#3C3C3C" stroke-width="2.5" stroke-linecap="round"><path d="M10 3L5 8L10 13"/></svg>
@@ -355,74 +350,11 @@
         <!-- Where does your money go? -->
         <div class="mb-5">
             <div class="font-display text-sm font-bold uppercase tracking-widest mb-1">If you fail, your money goes to...</div>
-            <div class="font-mono text-xs text-muted mb-3">Pick something you’d hate to fund. That’s the point.</div>
-
-            <div class="font-mono text-xs text-ink/40 uppercase tracking-[0.15em] mb-2 mt-3">NEMESIS OPTIONS</div>
-            <div class="space-y-2 mb-4" id="nemesis-list">
-                <div class="bg-cream border-2 rounded-xl p-3 flex items-center gap-3 cursor-pointer nemesis-option" onclick="selectNemesis(this)" style="border-color:#006D5B; background:#006D5B08;">
-                    <span class="w-8 h-8 bg-bite/10 border-2 border-ink/20 rounded-lg flex items-center justify-center"><i data-lucide="landmark" class="w-4 h-4 text-bite"></i></span>
-                    <div class="flex-1">
-                        <div class="font-display text-base font-bold">The Politician</div>
-                        <div class="font-mono text-xs text-muted">Funds the campaign you despise</div>
-                    </div>
-                    <div class="nemesis-check w-5 h-5 border-2 border-moss rounded-full bg-moss flex items-center justify-center text-white text-[10px] font-black">✓</div>
-                </div>
-                <div class="bg-cream border-2 border-ink/10 rounded-xl p-3 flex items-center gap-3 cursor-pointer nemesis-option" onclick="selectNemesis(this)">
-                    <span class="w-8 h-8 bg-bite/10 border-2 border-ink/20 rounded-lg flex items-center justify-center"><i data-lucide="heart-crack" class="w-4 h-4 text-bite"></i></span>
-                    <div class="flex-1">
-                        <div class="font-display text-base font-bold">The Ex</div>
-                        <div class="font-mono text-xs text-muted">Swish payment with your name on it</div>
-                    </div>
-                    <div class="nemesis-check w-5 h-5 border-2 border-ink/20 rounded-full"></div>
-                </div>
-                <div class="bg-cream border-2 border-ink/10 rounded-xl p-3 flex items-center gap-3 cursor-pointer nemesis-option" onclick="selectNemesis(this)">
-                    <span class="w-8 h-8 bg-bite/10 border-2 border-ink/20 rounded-lg flex items-center justify-center"><i data-lucide="megaphone" class="w-4 h-4 text-bite"></i></span>
-                    <div class="flex-1">
-                        <div class="font-display text-base font-bold">The Influencer</div>
-                        <div class="font-mono text-xs text-muted">Sponsors the most insufferable creator</div>
-                    </div>
-                    <div class="nemesis-check w-5 h-5 border-2 border-ink/20 rounded-full"></div>
-                </div>
-                <div class="bg-cream border-2 border-ink/10 rounded-xl p-3 flex items-center gap-3 cursor-pointer nemesis-option" onclick="selectNemesis(this)">
-                    <span class="w-8 h-8 bg-bite/10 border-2 border-ink/20 rounded-lg flex items-center justify-center"><i data-lucide="flame" class="w-4 h-4 text-bite"></i></span>
-                    <div class="flex-1">
-                        <div class="font-display text-base font-bold">The Anti-Cause</div>
-                        <div class="font-mono text-xs text-muted">Funds an org against your values</div>
-                    </div>
-                    <div class="nemesis-check w-5 h-5 border-2 border-ink/20 rounded-full"></div>
-                </div>
-            </div>
-
-            <div class="font-mono text-xs text-ink/40 uppercase tracking-[0.15em] mb-2">ORGANISATION</div>
-            <div class="space-y-2 mb-4">
-                <div class="bg-cream border-2 border-ink/10 rounded-xl p-3 flex items-center gap-3 cursor-pointer nemesis-option" onclick="selectNemesis(this)">
-                    <span class="w-8 h-8 bg-bite/10 border-2 border-ink/20 rounded-lg flex items-center justify-center"><i data-lucide="building-2" class="w-4 h-4 text-bite"></i></span>
-                    <div class="flex-1">
-                        <div class="font-display text-base font-bold">A lobbying group you hate</div>
-                        <div class="font-mono text-xs text-muted">Donation to their advocacy fund</div>
-                    </div>
-                    <div class="nemesis-check w-5 h-5 border-2 border-ink/20 rounded-full"></div>
-                </div>
-                <div class="bg-cream border-2 border-ink/10 rounded-xl p-3 flex items-center gap-3 cursor-pointer nemesis-option" onclick="selectNemesis(this)">
-                    <span class="w-8 h-8 bg-bite/10 border-2 border-ink/20 rounded-lg flex items-center justify-center"><i data-lucide="globe" class="w-4 h-4 text-bite"></i></span>
-                    <div class="flex-1">
-                        <div class="font-display text-base font-bold">The cause you oppose most</div>
-                        <div class="font-mono text-xs text-muted">Your stake becomes their donation</div>
-                    </div>
-                    <div class="nemesis-check w-5 h-5 border-2 border-ink/20 rounded-full"></div>
-                </div>
-            </div>
-
-            <div class="font-mono text-xs text-ink/40 uppercase tracking-[0.15em] mb-2">PERSONAL</div>
-            <div class="space-y-2">
-                <div class="bg-cream border-2 border-ink/10 rounded-xl p-3 flex items-center gap-3 cursor-pointer nemesis-option" onclick="selectNemesis(this)">
-                    <span class="w-8 h-8 bg-bite/10 border-2 border-ink/20 rounded-lg flex items-center justify-center"><i data-lucide="user-x" class="w-4 h-4 text-bite"></i></span>
-                    <div class="flex-1">
-                        <div class="font-display text-base font-bold">Someone specific</div>
-                        <div class="font-mono text-xs text-muted">They get a Swish payment with your name on it</div>
-                    </div>
-                    <div class="nemesis-check w-5 h-5 border-2 border-ink/20 rounded-full"></div>
-                </div>
+            <div class="font-mono text-xs text-muted mb-3">Use saved organizations from Home. Add at least one to continue.</div>
+            <div class="space-y-2 mb-4" id="nemesis-list"></div>
+            <div id="nemesis-empty" class="hidden rounded-xl border-2 border-dashed border-ink/20 bg-cream p-4 text-center">
+                <div class="font-display text-sm font-bold text-ink/60">No saved organizations yet.</div>
+                <div class="font-mono text-xs text-muted mt-1">Go to Home and add one in “My Nemesis Organizations”.</div>
             </div>
         </div>
 
@@ -434,85 +366,13 @@
     </div>
 </div>
 
-<!-- ================================ -->
-<!-- SCREEN: GROUP PACT               -->
-<!-- ================================ -->
-<div id="screen-group" class="screen">
-    <div class="max-w-lg mx-auto w-full px-5 pt-4 pb-24 md:pt-20 md:pb-12">
-
-        <button onclick="goTo('screen-home')" class="md:hidden mb-4 card w-8 h-8 flex items-center justify-center" style="border-width:2px;">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#3C3C3C" stroke-width="2.5" stroke-linecap="round"><path d="M10 3L5 8L10 13"/></svg>
-        </button>
-
-        <div class="font-display text-2xl font-extrabold mb-1">Group Pact</div>
-        <div class="font-body text-base text-muted mb-5">Mutual Assured Destruction</div>
-
-        <p class="font-body text-base text-ink/50 mb-5">One person fails, <span class="text-ink font-semibold">everyone loses.</span></p>
-
-        <!-- The Pact -->
-        <div class="card p-4 mb-4" style="border-color:#006D5B;">
-            <div class="font-mono text-xs text-muted uppercase tracking-[0.2em] mb-2">GROUP CONTRACT</div>
-            <div class="font-display text-lg font-bold">“No fast fashion this month”</div>
-            <div class="font-body text-sm text-muted mt-1">30 days · Ends Feb 28</div>
-        </div>
-
-        <!-- Pool -->
-        <div class="card p-4 mb-4 text-center" style="border-color:#006D5B;">
-            <div class="font-mono text-xs text-muted uppercase tracking-[0.2em] mb-1">TOTAL STAKE POOL</div>
-            <div class="font-display text-4xl font-extrabold text-moss">€200</div>
-            <div class="font-body text-sm text-muted mt-1">4 people × €50</div>
-        </div>
-
-        <!-- Participants -->
-        <div class="mb-4">
-            <div class="font-display text-sm font-bold uppercase tracking-widest mb-3">Participants</div>
-            <div class="grid grid-cols-2 gap-2">
-                <div class="bg-cream border-2 border-ink/10 rounded-xl p-3 text-center">
-                    <div class="w-10 h-10 bg-ink/5 border-2 border-ink/20 rounded-full flex items-center justify-center mx-auto mb-1 overflow-hidden">
-                        <img src="https://res.cloudinary.com/yevhenii-kalashnyk/image/upload/e_background_removal/c_fill,ar_3:4,g_auto,f_png/v1771693879/Gemini_Generated_Image_3goprg3goprg3gop_l9flik.png" alt="" class="w-6 h-8 object-contain">
-                    </div>
-                    <div class="font-display text-sm font-bold">You</div>
-                    <div class="font-mono text-xs text-moss font-bold">88%</div>
-                </div>
-                <div class="bg-cream border-2 border-ink/10 rounded-xl p-3 text-center">
-                    <div class="w-10 h-10 bg-ink/5 border-2 border-ink/20 rounded-full flex items-center justify-center mx-auto mb-1"><i data-lucide="user" class="w-5 h-5 text-ink/40"></i></div>
-                    <div class="font-display text-sm font-bold">Sara</div>
-                    <div class="font-mono text-xs text-coral font-bold">60% <i data-lucide="alert-triangle" class="w-3 h-3 inline text-coral"></i></div>
-                </div>
-                <div class="bg-cream border-2 border-ink/10 rounded-xl p-3 text-center">
-                    <div class="w-10 h-10 bg-ink/5 border-2 border-ink/20 rounded-full flex items-center justify-center mx-auto mb-1"><i data-lucide="user" class="w-5 h-5 text-ink/40"></i></div>
-                    <div class="font-display text-sm font-bold">Erik</div>
-                    <div class="font-mono text-xs text-ink/50 font-bold">72%</div>
-                </div>
-                <div class="bg-cream border-2 border-ink/10 rounded-xl p-3 text-center">
-                    <div class="w-10 h-10 bg-ink/5 border-2 border-ink/20 rounded-full flex items-center justify-center mx-auto mb-1"><i data-lucide="user" class="w-5 h-5 text-ink/40"></i></div>
-                    <div class="font-display text-sm font-bold">Dave</div>
-                    <div class="font-mono text-xs text-moss font-bold">92%</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Warning -->
-        <div class="flex items-start gap-3 p-3 mb-5 rounded-xl" style="background:#FF4B4B10;">
-            <i data-lucide="alert-triangle" class="w-5 h-5 text-coral shrink-0 mt-0.5"></i>
-            <div>
-                <div class="font-display text-sm font-bold text-coral">Sara’s integrity score is only 60%.</div>
-                <div class="font-body text-sm text-ink/50 mt-0.5">If she fails, you all lose €50. Trust her?</div>
-            </div>
-        </div>
-
-        <button onclick="goTo('screen-home')" class="btn w-full px-6 py-4 bg-coral text-white text-base uppercase tracking-widest">
-            <i data-lucide="skull" class="w-4 h-4 inline mr-1"></i> Seal the Blood Pact
-        </button>
-        <p class="font-mono text-xs text-muted text-center mt-2 mb-4">No backing out. Friendships may be casualties.</p>
-    </div>
-</div>
+<!-- SCREEN: GROUP PACT removed (preserved in git history) -->
 
 <!-- ================================ -->
 <!-- SCREEN: THE BITE (LOSS)          -->
 <!-- ================================ -->
 <div id="screen-bite" class="screen">
-    <div class="max-w-lg mx-auto w-full px-5 pt-8 pb-24 md:pt-24 md:pb-12 flex flex-col items-center">
+    <div class="max-w-lg mx-auto w-full px-5 pt-10 pb-28 md:pt-28 md:pb-16 flex flex-col items-center">
 
         <img src="https://res.cloudinary.com/yevhenii-kalashnyk/image/upload/e_background_removal/c_fill,ar_3:4,g_auto,f_png/v1771693879/Gemini_Generated_Image_3goprg3goprg3gop_l9flik.png" alt="Morkis" class="w-28 h-36 object-contain mb-4 drop-shadow-[0_4px_12px_rgba(255,107,107,0.3)]">
 
@@ -557,7 +417,7 @@
 <!-- SCREEN: MONSTER SHOP             -->
 <!-- ================================ -->
 <div id="screen-shop" class="screen">
-    <div class="max-w-2xl mx-auto w-full px-5 pt-4 pb-24 md:pt-20 md:pb-12">
+    <div class="max-w-2xl mx-auto w-full px-5 pt-6 pb-28 md:pt-24 md:pb-16">
 
         <button onclick="goTo('screen-home')" class="md:hidden mb-4 card w-8 h-8 flex items-center justify-center" style="border-width:2px;">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#3C3C3C" stroke-width="2.5" stroke-linecap="round"><path d="M10 3L5 8L10 13"/></svg>
@@ -618,9 +478,133 @@
 
 <script>
     let currentScreen = 'screen-home';
+    const DEFAULT_ORGANIZATIONS = [];
     let failureRoastAudio = null;
     let failureRoastUrl = null;
     let failureRoastLoading = false;
+    let organizations = [];
+    let selectedNemesisId = null;
+
+    function escapeHtml(text) {
+        return String(text || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/\"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function getOrgTypeLabel(type) {
+        if (type === 'politician') return 'Politician';
+        if (type === 'the_ex') return 'The Ex';
+        if (type === 'influencer') return 'Influencer';
+        return 'Custom';
+    }
+
+    function getOrgIcon(type) {
+        if (type === 'politician') return 'landmark';
+        if (type === 'the_ex') return 'heart-crack';
+        if (type === 'influencer') return 'megaphone';
+        return 'building-2';
+    }
+
+    function loadOrganizations() {
+        try {
+            const raw = localStorage.getItem('morkis-organizations');
+            if (!raw) {
+                organizations = [...DEFAULT_ORGANIZATIONS];
+                return;
+            }
+            const parsed = JSON.parse(raw);
+            organizations = Array.isArray(parsed) ? parsed : [...DEFAULT_ORGANIZATIONS];
+        } catch (e) {
+            organizations = [...DEFAULT_ORGANIZATIONS];
+        }
+    }
+
+    function saveOrganizations() {
+        localStorage.setItem('morkis-organizations', JSON.stringify(organizations));
+    }
+
+    function renderOrganizationsList() {
+        const list = document.getElementById('org-list');
+        if (!list) return;
+        list.innerHTML = organizations.map(org => `
+            <div class="bg-cream border-2 border-ink/10 rounded-xl p-3">
+                <div class="flex items-center justify-between gap-2">
+                    <div class="min-w-0">
+                        <div class="font-display text-sm font-bold text-ink truncate">${escapeHtml(org.name)}</div>
+                        <div class="font-mono text-[10px] text-muted">${escapeHtml(getOrgTypeLabel(org.type))}${org.iban ? ` · ${escapeHtml(org.iban)}` : ''}</div>
+                        ${org.extra ? `<div class="font-body text-xs text-ink/60 mt-1">${escapeHtml(org.extra)}</div>` : ''}
+                    </div>
+                    <button type="button" onclick="deleteOrganization('${escapeHtml(org.id)}')" class="text-coral text-xs font-bold uppercase tracking-widest">Remove</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function renderNemesisOptions() {
+        const list = document.getElementById('nemesis-list');
+        const empty = document.getElementById('nemesis-empty');
+        if (!list) return;
+
+        if (!organizations.length) {
+            selectedNemesisId = null;
+            list.innerHTML = '';
+            if (empty) empty.classList.remove('hidden');
+            return;
+        }
+
+        if (!selectedNemesisId || !organizations.some(org => org.id === selectedNemesisId)) {
+            selectedNemesisId = organizations[0].id;
+        }
+
+        if (empty) empty.classList.add('hidden');
+        list.innerHTML = organizations.map((org) => `
+            <div class="bg-cream border-2 rounded-xl p-3 flex items-center gap-3 cursor-pointer nemesis-option" onclick="selectNemesis(this)" style="${selectedNemesisId === org.id ? 'border-color:#006D5B; background:#006D5B08;' : 'border-color:rgba(60,60,60,0.1); background:#F7F7F7;'}" data-org-id="${escapeHtml(org.id)}">
+                <span class="w-8 h-8 bg-bite/10 border-2 border-ink/20 rounded-lg flex items-center justify-center"><i data-lucide="${escapeHtml(getOrgIcon(org.type))}" class="w-4 h-4 text-bite"></i></span>
+                <div class="flex-1 min-w-0">
+                    <div class="font-display text-base font-bold truncate">${escapeHtml(org.name)}</div>
+                    <div class="font-mono text-xs text-muted">${escapeHtml(getOrgTypeLabel(org.type))}${org.iban ? ` · ${escapeHtml(org.iban)}` : ''}${org.extra ? ` · ${escapeHtml(org.extra)}` : ''}</div>
+                </div>
+                <div class="nemesis-check w-5 h-5 border-2 rounded-full ${selectedNemesisId === org.id ? 'border-moss bg-moss text-white' : 'border-ink/20'} flex items-center justify-center text-[10px] font-black" style="line-height:1">${selectedNemesisId === org.id ? '✓' : ''}</div>
+            </div>
+        `).join('');
+
+        lucide.createIcons();
+    }
+
+    function saveOrganization(event) {
+        event.preventDefault();
+        const name = document.getElementById('org-name').value.trim();
+        const type = document.getElementById('org-type').value;
+        const iban = document.getElementById('org-iban').value.trim();
+        const extra = document.getElementById('org-extra').value.trim();
+
+        if (!name) return;
+
+        organizations.push({
+            id: `org-${Date.now()}`,
+            name,
+            type,
+            iban,
+            extra
+        });
+
+        saveOrganizations();
+        renderOrganizationsList();
+        renderNemesisOptions();
+
+        event.target.reset();
+        document.getElementById('org-name').focus();
+    }
+
+    function deleteOrganization(id) {
+        organizations = organizations.filter(org => org.id !== id);
+        saveOrganizations();
+        renderOrganizationsList();
+        renderNemesisOptions();
+    }
 
     function goTo(id) {
         document.getElementById(currentScreen)?.classList.remove('active');
@@ -645,7 +629,7 @@
         });
 
         // Show/hide mobile tabs on all main screens
-        const showTabs = ['screen-home','screen-contract','screen-group','screen-shop','screen-bite'];
+        const showTabs = ['screen-home','screen-contract','screen-shop','screen-bite'];
         document.getElementById('mobile-tabs').style.display = showTabs.includes(id) ? 'flex' : 'none';
 
         if (id === 'screen-bite') {
@@ -744,6 +728,15 @@
         const input = document.getElementById('pact-input');
         const text = input.value.trim();
         if (!text) { input.focus(); return; }
+        if (!organizations.length) {
+            alert('Add at least one organization in Home first.');
+            goTo('screen-home');
+            return;
+        }
+        if (!selectedNemesisId) {
+            alert('Select a nemesis organization first.');
+            return;
+        }
 
         const stake = document.getElementById('stake-slider').value;
         let duration = '7 days';
@@ -755,12 +748,8 @@
         const durationDays = parseInt(duration);
 
         // Find selected nemesis
-        let nemesis = 'Unknown';
-        document.querySelectorAll('.nemesis-option').forEach(o => {
-            if (o.style.borderColor === 'rgb(0, 109, 91)') {
-                nemesis = o.querySelector('.font-display')?.textContent || 'Unknown';
-            }
-        });
+        const selectedOrg = organizations.find(org => org.id === selectedNemesisId);
+        const nemesis = selectedOrg?.name || 'Unknown';
 
         // Pick a Lucide icon based on pact text
         let iconName = 'sparkles';
@@ -832,6 +821,7 @@
     }
 
     function selectNemesis(el) {
+        selectedNemesisId = el.dataset.orgId || null;
         document.querySelectorAll('.nemesis-option').forEach(o => {
             o.style.borderColor = 'rgba(60,60,60,0.1)'; o.style.background = '#F7F7F7';
             const r = o.querySelector('.nemesis-check');
@@ -844,6 +834,10 @@
 
     // Init: mark home as active in desktop nav
     document.querySelector('.nav-link[data-screen="screen-home"]')?.classList.add('text-moss');
+
+    loadOrganizations();
+    renderOrganizationsList();
+    renderNemesisOptions();
 
     // Init Lucide icons
     lucide.createIcons();

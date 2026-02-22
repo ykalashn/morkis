@@ -3,9 +3,10 @@ import os
 import sqlite3
 from datetime import date, datetime, timedelta
 from pathlib import Path
-from typing import Optional
+from typing import Any, Dict, List, Optional
 
 import plaid
+import stripe
 from dotenv import load_dotenv
 from elevenlabs.client import ElevenLabs
 from fastapi import FastAPI, HTTPException
@@ -26,6 +27,7 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent
 DATABASE = BASE_DIR / "morkis.db"
+
 app = FastAPI(title="Morkis API")
 
 allowed_origins = [
@@ -44,10 +46,13 @@ app.add_middleware(
 app.mount("/static", StaticFiles(directory=BASE_DIR), name="static")
 
 
+# =========================
+# Request models
+# =========================
 class RoastRequest(BaseModel):
     user_name: str = "friend"
     failed_goal: str = "your goal"
-    amount: str = "€30"
+    amount: str = "EUR30"
 
 
 class PlaidLinkTokenRequest(BaseModel):
@@ -59,51 +64,157 @@ class PlaidExchangeTokenRequest(BaseModel):
     public_token: str
 
 
+class StripeTestChargeRequest(BaseModel):
+    amount_eur: float = 1.0
+    payment_method_id: str = "pm_card_visa"
+    description: str = "Morkis test charge"
+
+
+class ContractCreateRequest(BaseModel):
+    category: str
+    spending_limit: float
+    bet_amount: float
+    anti_charity: Optional[str] = None
+    organization_id: Optional[int] = None
+    duration_days: int = 30
+    payment_method_id: Optional[str] = None
+
+
+class MockTransactionCreateRequest(BaseModel):
+    name: str
+    amount: float
+    category: str
+    date: Optional[str] = None
+
+
+# =========================
+# DB helpers
+# =========================
+def get_conn(row_factory: bool = False) -> sqlite3.Connection:
+    conn = sqlite3.connect(DATABASE)
+    if row_factory:
+        conn.row_factory = sqlite3.Row
+    return conn
+
+
 def init_db() -> None:
-    with sqlite3.connect(DATABASE) as conn:
-        conn.execute(
-            """
-            CREATE TABLE IF NOT EXISTS plaid_items (
-                user_id TEXT PRIMARY KEY,
-                access_token TEXT NOT NULL,
-                item_id TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-            """
+    conn = get_conn()
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS plaid_items (
+            user_id TEXT PRIMARY KEY,
+            access_token TEXT NOT NULL,
+            item_id TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
-        conn.commit()
+        """
+    )
+
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS contracts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            category TEXT NOT NULL,
+            spending_limit REAL NOT NULL,
+            bet_amount REAL NOT NULL,
+            anti_charity TEXT NOT NULL,
+            start_date DATE NOT NULL,
+            end_date DATE NOT NULL,
+            status TEXT DEFAULT 'active',
+            payment_method_id TEXT,
+            payment_status TEXT DEFAULT 'pending',
+            stripe_payment_intent_id TEXT,
+            stripe_customer_id TEXT,
+            organization_id INTEGER,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS organizations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            description TEXT,
+            stripe_account_id TEXT,
+            category TEXT DEFAULT 'other',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS mock_transactions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            amount REAL NOT NULL,
+            category TEXT NOT NULL,
+            date DATE NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+
+    # Backfill columns for older DBs
+    alter_statements = [
+        "ALTER TABLE contracts ADD COLUMN payment_method_id TEXT",
+        "ALTER TABLE contracts ADD COLUMN payment_status TEXT DEFAULT 'pending'",
+        "ALTER TABLE contracts ADD COLUMN stripe_payment_intent_id TEXT",
+        "ALTER TABLE contracts ADD COLUMN stripe_customer_id TEXT",
+        "ALTER TABLE contracts ADD COLUMN organization_id INTEGER",
+    ]
+    for stmt in alter_statements:
+        try:
+            conn.execute(stmt)
+        except sqlite3.OperationalError:
+            pass
+
+    conn.commit()
+    conn.close()
 
 
 def upsert_plaid_item(user_id: str, access_token: str, item_id: Optional[str]) -> None:
-    with sqlite3.connect(DATABASE) as conn:
-        conn.execute(
-            """
-            INSERT INTO plaid_items (user_id, access_token, item_id)
-            VALUES (?, ?, ?)
-            ON CONFLICT(user_id) DO UPDATE SET
-                access_token = excluded.access_token,
-                item_id = excluded.item_id,
-                updated_at = CURRENT_TIMESTAMP
-            """,
-            (user_id, access_token, item_id),
-        )
-        conn.commit()
+    conn = get_conn()
+    conn.execute(
+        """
+        INSERT INTO plaid_items (user_id, access_token, item_id)
+        VALUES (?, ?, ?)
+        ON CONFLICT(user_id) DO UPDATE SET
+            access_token = excluded.access_token,
+            item_id = excluded.item_id,
+            updated_at = CURRENT_TIMESTAMP
+        """,
+        (user_id, access_token, item_id),
+    )
+    conn.commit()
+    conn.close()
 
 
 def get_access_token(user_id: str) -> Optional[str]:
-    with sqlite3.connect(DATABASE) as conn:
-        row = conn.execute(
-            "SELECT access_token FROM plaid_items WHERE user_id = ?",
-            (user_id,),
-        ).fetchone()
+    conn = get_conn()
+    row = conn.execute("SELECT access_token FROM plaid_items WHERE user_id = ?", (user_id,)).fetchone()
+    conn.close()
     return row[0] if row else None
 
 
+def get_mock_transactions() -> List[Dict[str, Any]]:
+    conn = get_conn(row_factory=True)
+    rows = conn.execute("SELECT * FROM mock_transactions ORDER BY date DESC").fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+
+# =========================
+# Plaid / Stripe helpers
+# =========================
 def get_plaid_client() -> plaid_api.PlaidApi:
     client_id = os.getenv("PLAID_CLIENT_ID")
     secret = os.getenv("PLAID_SECRET")
     env = os.getenv("PLAID_ENV", "sandbox").lower()
+
     if not client_id or not secret:
         raise HTTPException(status_code=500, detail="Missing PLAID_CLIENT_ID or PLAID_SECRET")
 
@@ -127,6 +238,173 @@ def get_plaid_client() -> plaid_api.PlaidApi:
     return plaid_api.PlaidApi(api_client)
 
 
+def get_stripe_secret_key() -> str:
+    secret_key = os.getenv("STRIPE_SECRET_KEY")
+    if not secret_key:
+        raise HTTPException(status_code=500, detail="Missing STRIPE_SECRET_KEY")
+    return secret_key
+
+
+def fetch_plaid_transactions(access_token: str, days: int = 90) -> List[Dict[str, Any]]:
+    plaid_client = get_plaid_client()
+    end_date = date.today()
+    start_date = end_date - timedelta(days=max(1, min(days, 365)))
+
+    transactions_request = TransactionsGetRequest(
+        access_token=access_token,
+        start_date=start_date,
+        end_date=end_date,
+        options=TransactionsGetRequestOptions(count=500),
+    )
+    response = plaid_client.transactions_get(transactions_request)
+
+    transactions: List[Dict[str, Any]] = []
+    for txn in response.transactions:
+        primary_category = "OTHER"
+        detailed_category = "OTHER"
+        confidence = "UNKNOWN"
+
+        if getattr(txn, "personal_finance_category", None):
+            pfc = txn.personal_finance_category
+            primary_category = getattr(pfc, "primary", "OTHER") or "OTHER"
+            detailed_category = getattr(pfc, "detailed", primary_category) or primary_category
+            confidence = getattr(pfc, "confidence_level", "UNKNOWN") or "UNKNOWN"
+
+        transactions.append(
+            {
+                "id": txn.transaction_id,
+                "name": txn.merchant_name or txn.name,
+                "amount": txn.amount,
+                "date": txn.date.isoformat() if isinstance(txn.date, (date, datetime)) else str(txn.date),
+                "primary_category": primary_category,
+                "detailed_category": detailed_category,
+                "confidence": confidence,
+                "logo_url": getattr(txn, "logo_url", None),
+                "is_mock": False,
+            }
+        )
+
+    return transactions
+
+
+def seed_demo_organizations() -> None:
+    conn = get_conn()
+    existing = conn.execute("SELECT COUNT(*) FROM organizations").fetchone()[0]
+    if existing > 0:
+        conn.close()
+        return
+
+    demo_orgs = [
+        ("Red Cross", "International humanitarian organization", "charity"),
+        ("Greenpeace", "Environmental activism organization", "environment"),
+        ("UNICEF", "Children's rights and emergency relief", "charity"),
+        ("Political Party A", "Political organization", "political"),
+        ("Rival Football Club", "Sports organization", "sports"),
+    ]
+
+    stripe_key = os.getenv("STRIPE_SECRET_KEY")
+    if stripe_key:
+        stripe.api_key = stripe_key
+
+    for name, desc, category in demo_orgs:
+        stripe_account_id = None
+        if stripe_key:
+            try:
+                account = stripe.Account.create(
+                    type="express",
+                    country="IE",
+                    email=f"demo_{name.lower().replace(' ', '_')}@example.com",
+                    capabilities={
+                        "card_payments": {"requested": True},
+                        "transfers": {"requested": True},
+                    },
+                    business_type="non_profit",
+                    metadata={"demo": "true", "org_name": name},
+                )
+                stripe_account_id = account.id
+                print(f"[STRIPE CONNECT] Created account for {name}: {stripe_account_id}")
+            except stripe.error.StripeError as exc:
+                print(f"[STRIPE CONNECT] Error creating account for {name}: {exc}")
+
+        conn.execute(
+            "INSERT INTO organizations (name, description, stripe_account_id, category) VALUES (?, ?, ?, ?)",
+            (name, desc, stripe_account_id, category),
+        )
+
+    conn.commit()
+    conn.close()
+
+
+def update_contract_status(contract_dict: Dict[str, Any]) -> Dict[str, Any]:
+    today = date.today()
+    contract_end = datetime.fromisoformat(contract_dict["end_date"]).date()
+    if contract_dict["status"] == "active" and today > contract_end:
+        conn = get_conn()
+        conn.execute("UPDATE contracts SET status = 'won' WHERE id = ?", (contract_dict["id"],))
+        conn.commit()
+        conn.close()
+        contract_dict["status"] = "won"
+    return contract_dict
+
+
+def charge_contract(contract_dict: Dict[str, Any]) -> Dict[str, Any]:
+    stripe.api_key = get_stripe_secret_key()
+    amount_cents = int(contract_dict["bet_amount"] * 100)
+
+    try:
+        destination_account = None
+        if contract_dict.get("organization_id"):
+            conn = get_conn(row_factory=True)
+            org = conn.execute(
+                "SELECT stripe_account_id FROM organizations WHERE id = ?",
+                (contract_dict["organization_id"],),
+            ).fetchone()
+            conn.close()
+            if org and org["stripe_account_id"]:
+                destination_account = org["stripe_account_id"]
+
+        payment_params: Dict[str, Any] = {
+            "amount": amount_cents,
+            "currency": "eur",
+            "customer": contract_dict.get("stripe_customer_id"),
+            "payment_method": contract_dict["payment_method_id"],
+            "confirm": True,
+            "off_session": True,
+            "description": f"Contract penalty: {contract_dict['category']} - {contract_dict['anti_charity']}",
+            "metadata": {
+                "contract_id": str(contract_dict["id"]),
+                "anti_charity": contract_dict["anti_charity"],
+                "category": contract_dict["category"],
+            },
+        }
+
+        if destination_account:
+            application_fee = int(amount_cents * 0.10)
+            payment_params["transfer_data"] = {"destination": destination_account}
+            payment_params["application_fee_amount"] = application_fee
+
+        payment_intent = stripe.PaymentIntent.create(**payment_params)
+
+        conn = get_conn()
+        conn.execute(
+            "UPDATE contracts SET payment_status = 'charged', stripe_payment_intent_id = ? WHERE id = ?",
+            (payment_intent.id, contract_dict["id"]),
+        )
+        conn.commit()
+        conn.close()
+
+        return {"status": "charged", "payment_intent_id": payment_intent.id}
+    except stripe.error.StripeError as exc:
+        conn = get_conn()
+        conn.execute("UPDATE contracts SET payment_status = 'failed' WHERE id = ?", (contract_dict["id"],))
+        conn.commit()
+        conn.close()
+        return {"status": "failed", "error": str(exc)}
+
+
+# =========================
+# Static pages
+# =========================
 @app.get("/")
 def landing() -> FileResponse:
     return FileResponse(BASE_DIR / "index.html")
@@ -147,14 +425,14 @@ def app_html() -> FileResponse:
     return FileResponse(BASE_DIR / "app.html")
 
 
+# =========================
+# ElevenLabs endpoint
+# =========================
 @app.post("/api/failure-roast")
 def failure_roast(payload: RoastRequest):
     api_key = os.getenv("ELEVENLABS_API_KEY")
     if not api_key:
-        return JSONResponse(
-            status_code=500,
-            content={"error": "ELEVENLABS_API_KEY is missing in environment"},
-        )
+        return JSONResponse(status_code=500, content={"error": "ELEVENLABS_API_KEY is missing in environment"})
 
     voice_id = os.getenv("ELEVENLABS_VOICE_ID", "ysswSXp8U9dFpzPJqFje")
     model_id = os.getenv("ELEVENLABS_MODEL_ID", "eleven_multilingual_v2")
@@ -173,13 +451,15 @@ def failure_roast(payload: RoastRequest):
             model_id=model_id,
             output_format="mp3_44100_128",
         )
-
         audio_bytes = b"".join(audio_stream)
         return StreamingResponse(io.BytesIO(audio_bytes), media_type="audio/mpeg")
     except Exception as exc:  # pragma: no cover
         raise HTTPException(status_code=500, detail=f"ElevenLabs request failed: {exc}") from exc
 
 
+# =========================
+# Plaid endpoints
+# =========================
 @app.post("/api/plaid/create_link_token")
 def create_link_token(payload: PlaidLinkTokenRequest):
     plaid_client = get_plaid_client()
@@ -221,44 +501,26 @@ def get_transactions(user_id: str, days: int = 90):
     if not access_token:
         raise HTTPException(status_code=404, detail="No Plaid access token for this user")
 
-    plaid_client = get_plaid_client()
-    end_date = date.today()
-    start_date = end_date - timedelta(days=max(1, min(days, 365)))
-
     try:
-        transactions_request = TransactionsGetRequest(
-            access_token=access_token,
-            start_date=start_date,
-            end_date=end_date,
-            options=TransactionsGetRequestOptions(count=500),
-        )
-        response = plaid_client.transactions_get(transactions_request)
+        transactions = fetch_plaid_transactions(access_token, days)
 
-        transactions: list[dict[str, object]] = []
-        for txn in response.transactions:
-            primary_category = "OTHER"
-            detailed_category = "OTHER"
-            confidence = "UNKNOWN"
-
-            if getattr(txn, "personal_finance_category", None):
-                pfc = txn.personal_finance_category
-                primary_category = getattr(pfc, "primary", "OTHER") or "OTHER"
-                detailed_category = getattr(pfc, "detailed", primary_category) or primary_category
-                confidence = getattr(pfc, "confidence_level", "UNKNOWN") or "UNKNOWN"
-
+        # Merge mock transactions for test/debug parity with original project
+        for mock in get_mock_transactions():
             transactions.append(
                 {
-                    "id": txn.transaction_id,
-                    "name": txn.merchant_name or txn.name,
-                    "amount": txn.amount,
-                    "date": txn.date.isoformat() if isinstance(txn.date, (date, datetime)) else str(txn.date),
-                    "primary_category": primary_category,
-                    "detailed_category": detailed_category,
-                    "confidence": confidence,
-                    "logo_url": getattr(txn, "logo_url", None),
+                    "id": f"mock_{mock['id']}",
+                    "name": mock["name"],
+                    "amount": mock["amount"],
+                    "date": mock["date"],
+                    "primary_category": mock["category"],
+                    "detailed_category": mock["category"],
+                    "confidence": "MOCK",
+                    "logo_url": None,
+                    "is_mock": True,
                 }
             )
 
+        transactions.sort(key=lambda item: item["date"], reverse=True)
         return {"transactions": transactions}
     except plaid.ApiException as exc:
         raise HTTPException(status_code=500, detail=f"Plaid transactions failed: {exc}") from exc
@@ -269,7 +531,275 @@ def plaid_status(user_id: str):
     return {"user_id": user_id, "has_access_token": bool(get_access_token(user_id))}
 
 
+# =========================
+# Stripe + contracts endpoints
+# =========================
+@app.get("/api/stripe/config")
+def stripe_config():
+    return {"publishable_key": os.getenv("STRIPE_PUBLISHABLE_KEY")}
+
+
+@app.get("/api/stripe/status")
+def stripe_status():
+    return {
+        "configured": bool(os.getenv("STRIPE_SECRET_KEY")),
+        "publishable_key": os.getenv("STRIPE_PUBLISHABLE_KEY"),
+    }
+
+
+@app.post("/api/stripe/setup-intent")
+def stripe_setup_intent():
+    stripe.api_key = get_stripe_secret_key()
+    try:
+        setup_intent = stripe.SetupIntent.create(payment_method_types=["card"], usage="off_session")
+        return {"client_secret": setup_intent.client_secret}
+    except stripe.error.StripeError as exc:
+        raise HTTPException(status_code=500, detail=f"Stripe setup intent failed: {exc}") from exc
+
+
+@app.post("/api/stripe/test-charge")
+def stripe_test_charge(payload: StripeTestChargeRequest):
+    stripe.api_key = get_stripe_secret_key()
+    amount_cents = int(round(payload.amount_eur * 100))
+    if amount_cents < 50:
+        raise HTTPException(status_code=400, detail="Minimum charge is 0.50 EUR")
+
+    try:
+        payment_intent = stripe.PaymentIntent.create(
+            amount=amount_cents,
+            currency="eur",
+            payment_method=payload.payment_method_id,
+            confirm=True,
+            description=payload.description,
+            automatic_payment_methods={"enabled": False},
+            payment_method_types=["card"],
+        )
+        return {
+            "success": True,
+            "payment_intent_id": payment_intent.id,
+            "status": payment_intent.status,
+            "amount": payment_intent.amount,
+            "currency": payment_intent.currency,
+        }
+    except stripe.error.StripeError as exc:
+        raise HTTPException(status_code=500, detail=f"Stripe test charge failed: {exc}") from exc
+
+
+@app.get("/api/organizations")
+def organizations():
+    conn = get_conn(row_factory=True)
+    rows = conn.execute("SELECT * FROM organizations ORDER BY name").fetchall()
+    conn.close()
+    return {"organizations": [dict(row) for row in rows]}
+
+
+@app.get("/api/contracts")
+def list_contracts():
+    conn = get_conn(row_factory=True)
+    rows = conn.execute("SELECT * FROM contracts ORDER BY created_at DESC").fetchall()
+    conn.close()
+
+    contracts = []
+    for row in rows:
+        contract = dict(row)
+        contracts.append(update_contract_status(contract))
+
+    return {"contracts": contracts}
+
+
+@app.post("/api/contracts")
+def create_contract(payload: ContractCreateRequest):
+    anti_charity = payload.anti_charity
+    if payload.organization_id:
+        conn = get_conn(row_factory=True)
+        org = conn.execute("SELECT name FROM organizations WHERE id = ?", (payload.organization_id,)).fetchone()
+        conn.close()
+        if org:
+            anti_charity = org["name"]
+
+    if not anti_charity:
+        raise HTTPException(status_code=400, detail="Please select an organization or enter a name")
+
+    start_date = date.today()
+    end_date = start_date + timedelta(days=int(payload.duration_days))
+
+    stripe_customer_id = None
+    payment_status = "no_card"
+
+    if payload.payment_method_id:
+        stripe.api_key = get_stripe_secret_key()
+        try:
+            customer = stripe.Customer.create(
+                description=f"Contract user - {payload.category}",
+                metadata={"anti_charity": anti_charity},
+            )
+            stripe_customer_id = customer.id
+
+            stripe.PaymentMethod.attach(payload.payment_method_id, customer=stripe_customer_id)
+            stripe.Customer.modify(
+                stripe_customer_id,
+                invoice_settings={"default_payment_method": payload.payment_method_id},
+            )
+            payment_status = "card_saved"
+        except stripe.error.StripeError as exc:
+            raise HTTPException(status_code=400, detail=f"Payment setup failed: {exc}") from exc
+
+    conn = get_conn()
+    cursor = conn.execute(
+        """
+        INSERT INTO contracts (
+            category, spending_limit, bet_amount, anti_charity,
+            start_date, end_date, status, payment_method_id,
+            payment_status, stripe_customer_id, organization_id
+        )
+        VALUES (?, ?, ?, ?, ?, ?, 'active', ?, ?, ?, ?)
+        """,
+        (
+            payload.category,
+            float(payload.spending_limit),
+            float(payload.bet_amount),
+            anti_charity,
+            start_date.isoformat(),
+            end_date.isoformat(),
+            payload.payment_method_id,
+            payment_status,
+            stripe_customer_id,
+            payload.organization_id,
+        ),
+    )
+    conn.commit()
+    contract_id = cursor.lastrowid
+    conn.close()
+
+    return {"success": True, "contract_id": contract_id, "payment_status": payment_status}
+
+
+@app.delete("/api/contracts/{contract_id}")
+def delete_contract(contract_id: int):
+    conn = get_conn()
+    conn.execute("DELETE FROM contracts WHERE id = ?", (contract_id,))
+    conn.commit()
+    conn.close()
+    return {"success": True}
+
+
+@app.get("/api/contracts/progress")
+def contracts_progress(user_id: str, days: int = 90):
+    access_token = get_access_token(user_id)
+    if not access_token:
+        raise HTTPException(status_code=404, detail="No Plaid access token for this user")
+
+    conn = get_conn(row_factory=True)
+    contracts = conn.execute("SELECT * FROM contracts WHERE status = 'active'").fetchall()
+
+    if not contracts:
+        conn.close()
+        return {"contracts": []}
+
+    try:
+        transactions = fetch_plaid_transactions(access_token, days)
+
+        # Match original behavior: merge mock transactions for local testing
+        for mock in get_mock_transactions():
+            transactions.append(
+                {
+                    "date": mock["date"],
+                    "primary_category": mock["category"],
+                    "amount": mock["amount"],
+                }
+            )
+
+        today = date.today()
+        result = []
+
+        for row in contracts:
+            contract = dict(row)
+            contract_start = datetime.fromisoformat(contract["start_date"]).date()
+            contract_end = datetime.fromisoformat(contract["end_date"]).date()
+
+            spent = 0.0
+            for txn in transactions:
+                txn_date = datetime.fromisoformat(str(txn["date"]).split("T")[0]).date()
+                txn_category = txn.get("primary_category", "OTHER")
+                txn_amount = float(txn.get("amount", 0))
+
+                if (
+                    txn_amount > 0
+                    and txn_category == contract["category"]
+                    and contract_start <= txn_date <= min(contract_end, today)
+                ):
+                    spent += txn_amount
+
+            contract["spent"] = round(spent, 2)
+            contract["percentage"] = round((spent / contract["spending_limit"]) * 100, 1) if contract["spending_limit"] > 0 else 0
+            contract["days_remaining"] = max(0, (contract_end - today).days)
+
+            if spent > contract["spending_limit"] and contract["status"] == "active":
+                contract["status"] = "lost"
+                conn.execute("UPDATE contracts SET status = 'lost' WHERE id = ?", (contract["id"],))
+                conn.commit()
+
+                if contract.get("payment_method_id") and contract.get("payment_status") == "card_saved":
+                    charge_result = charge_contract(contract)
+                    contract["payment_status"] = charge_result["status"]
+                    contract["charge_error"] = charge_result.get("error")
+            elif today > contract_end and contract["status"] == "active":
+                contract["status"] = "won"
+                conn.execute("UPDATE contracts SET status = 'won' WHERE id = ?", (contract["id"],))
+                conn.commit()
+
+            result.append(contract)
+
+        conn.close()
+        return {"contracts": result}
+    except plaid.ApiException as exc:
+        conn.close()
+        raise HTTPException(status_code=500, detail=f"Contract progress failed: {exc}") from exc
+
+
+# =========================
+# Mock transaction endpoints
+# =========================
+@app.get("/api/mock-transactions")
+def list_mock_transactions():
+    return {"transactions": get_mock_transactions()}
+
+
+@app.post("/api/mock-transactions")
+def create_mock_transaction(payload: MockTransactionCreateRequest):
+    txn_date = payload.date or date.today().isoformat()
+    conn = get_conn()
+    cursor = conn.execute(
+        "INSERT INTO mock_transactions (name, amount, category, date) VALUES (?, ?, ?, ?)",
+        (payload.name, float(payload.amount), payload.category, txn_date),
+    )
+    conn.commit()
+    txn_id = cursor.lastrowid
+    conn.close()
+    return {"success": True, "transaction_id": txn_id}
+
+
+@app.delete("/api/mock-transactions/{txn_id}")
+def delete_mock_transaction(txn_id: int):
+    conn = get_conn()
+    conn.execute("DELETE FROM mock_transactions WHERE id = ?", (txn_id,))
+    conn.commit()
+    conn.close()
+    return {"success": True}
+
+
+@app.delete("/api/mock-transactions/clear")
+def clear_mock_transactions():
+    conn = get_conn()
+    conn.execute("DELETE FROM mock_transactions")
+    conn.commit()
+    conn.close()
+    return {"success": True}
+
+
+# Initialize once at startup
 init_db()
+seed_demo_organizations()
 
 
 if __name__ == "__main__":
