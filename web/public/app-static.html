@@ -310,27 +310,16 @@
 
         <!-- Pact Card -->
         <div class="card p-5 mb-5" style="border-style:dashed; border-color:#006D5B;">
-            <div class="font-mono text-xs text-muted uppercase tracking-[0.2em] mb-3">SMART CONTRACT — DRAFT</div>
-
             <div class="font-display text-sm font-bold text-ink/40 uppercase tracking-widest mb-2">I promise to...</div>
             <div class="flex gap-2 mb-3">
-                <input type="text" id="pact-input" class="flex-1 bg-cream border-2 border-ink/10 rounded-xl px-3 py-2.5 font-display text-base font-bold text-ink placeholder:text-ink/30 focus:border-moss focus:outline-none transition-colors" placeholder="Type your promise here..." value="Not order from Wolt this week">
-                <button onclick="addPact()" class="px-4 bg-moss text-white border-2 border-ink rounded-xl font-display text-xs font-bold uppercase tracking-widest hover:bg-moss/90 transition-colors" title="Add pact">Add</button>
+                <input type="text" id="pact-input" class="flex-1 bg-cream border-2 border-ink/10 rounded-xl px-3 py-2.5 font-display text-base font-bold text-ink placeholder:text-ink/30 focus:border-moss focus:outline-none transition-colors" placeholder="Type your promise here...">
+                <button onclick="addPact()" class="px-4 bg-moss text-white rounded-xl font-display text-xs font-bold uppercase tracking-widest hover:bg-moss/90 transition-colors" title="Add pact">Add</button>
             </div>
             <div id="pact-display" class="bg-cream border-2 border-moss rounded-xl p-3 mb-4 hidden">
                 <div class="flex items-center justify-between">
                     <div class="font-display text-base font-bold text-moss" id="pact-text"></div>
                     <button onclick="clearPact()" class="text-ink/30 hover:text-coral text-lg leading-none">&times;</button>
                 </div>
-            </div>
-
-            <div class="font-mono text-xs text-muted uppercase tracking-[0.15em] mb-2">OR PICK A PRESET</div>
-            <div class="flex flex-wrap gap-2 mb-5">
-                <button onclick="setPact('Not order from Wolt this week')" class="px-3 py-2 bg-cream border-2 border-ink/10 rounded-full font-display text-sm font-semibold text-ink/60 hover:border-moss hover:text-moss transition-colors">No Wolt</button>
-                <button onclick="setPact('Max 2 Espresso House visits')" class="px-3 py-2 bg-cream border-2 border-ink/10 rounded-full font-display text-sm font-semibold text-ink/60 hover:border-moss hover:text-moss transition-colors">Limit fika</button>
-                <button onclick="setPact('No Zalando purchases')" class="px-3 py-2 bg-cream border-2 border-ink/10 rounded-full font-display text-sm font-semibold text-ink/60 hover:border-moss hover:text-moss transition-colors">No Zalando</button>
-                <button onclick="setPact('No alcohol this week')" class="px-3 py-2 bg-cream border-2 border-ink/10 rounded-full font-display text-sm font-semibold text-ink/60 hover:border-moss hover:text-moss transition-colors">No booze</button>
-                <button onclick="setPact('Gym at least 3 times')" class="px-3 py-2 bg-cream border-2 border-ink/10 rounded-full font-display text-sm font-semibold text-ink/60 hover:border-moss hover:text-moss transition-colors">Gym 3x</button>
             </div>
 
             <div class="border-t-2 border-dashed border-ink/10 -mx-5 mb-5"></div>
@@ -530,25 +519,6 @@
         <div class="font-display text-lg font-extrabold text-coral uppercase tracking-[0.2em] mb-1">MORKIS HAS BITTEN</div>
         <div class="font-body text-base text-muted mb-4">You broke your word. Here’s what happened:</div>
 
-        <!-- How it works explanation -->
-        <div class="w-full p-4 mb-4 rounded-xl" style="background:#FF4B4B08;">
-            <div class="font-display text-sm font-bold text-coral uppercase tracking-widest mb-2"><i data-lucide="search" class="w-4 h-4 inline mr-1 text-coral"></i>How we caught you</div>
-            <div class="space-y-2">
-                <div class="flex items-start gap-2">
-                    <div class="w-6 h-6 bg-coral/10 border-2 border-coral/30 rounded-full flex items-center justify-center text-xs font-bold text-coral shrink-0 mt-0.5">1</div>
-                    <div class="font-body text-sm text-ink/60"><strong class="text-ink/80">Tink Open Banking</strong> monitors your transactions in real-time via your bank connection.</div>
-                </div>
-                <div class="flex items-start gap-2">
-                    <div class="w-6 h-6 bg-coral/10 border-2 border-coral/30 rounded-full flex items-center justify-center text-xs font-bold text-coral shrink-0 mt-0.5">2</div>
-                    <div class="font-body text-sm text-ink/60">It detected a <strong class="text-ink/80">Wolt payment of €34.90</strong> — matching your “No Wolt” pact.</div>
-                </div>
-                <div class="flex items-start gap-2">
-                    <div class="w-6 h-6 bg-coral/10 border-2 border-coral/30 rounded-full flex items-center justify-center text-xs font-bold text-coral shrink-0 mt-0.5">3</div>
-                    <div class="font-body text-sm text-ink/60"><strong class="text-ink/80">Stripe</strong> automatically transferred your €30 stake to your chosen nemesis: <span class="text-coral font-bold">The Politician.</span></div>
-                </div>
-            </div>
-        </div>
-
         <!-- Receipt -->
         <div class="w-full card p-5 mb-5" style="border-style:dashed;">
             <div class="font-mono text-xs text-muted uppercase tracking-[0.2em] mb-3">BITE RECEIPT — #MK-4491</div>
@@ -558,9 +528,7 @@
                 <div class="flex justify-between"><span class="font-mono text-xs text-muted uppercase">Pact</span><span class="font-display text-sm font-bold">No Wolt this week</span></div>
                 <div class="flex justify-between"><span class="font-mono text-xs text-muted uppercase">Broken</span><span class="font-display text-sm font-bold text-coral">Thu 01:47 AM</span></div>
                 <div class="flex justify-between"><span class="font-mono text-xs text-muted uppercase">Trigger</span><span class="font-display text-sm font-bold">Wolt — €34.90</span></div>
-                <div class="flex justify-between"><span class="font-mono text-xs text-muted uppercase">Detected by</span><span class="font-display text-sm font-bold">Tink Open Banking</span></div>
                 <div class="flex justify-between"><span class="font-mono text-xs text-muted uppercase">Sent to</span><span class="font-display text-sm font-bold text-coral">The Politician</span></div>
-                <div class="flex justify-between"><span class="font-mono text-xs text-muted uppercase">Via</span><span class="font-display text-sm font-bold">Stripe Connect</span></div>
             </div>
         </div>
 
@@ -867,11 +835,11 @@
         document.querySelectorAll('.nemesis-option').forEach(o => {
             o.style.borderColor = 'rgba(60,60,60,0.1)'; o.style.background = '#F7F7F7';
             const r = o.querySelector('.nemesis-check');
-            if (r) { r.style.borderColor = 'rgba(30,30,30,0.2)'; r.style.background = 'transparent'; r.textContent = ''; r.style.color = 'transparent'; r.style.fontSize = '0'; }
+            if (r) { r.style.borderColor = 'rgba(30,30,30,0.2)'; r.style.background = 'transparent'; r.textContent = ''; r.style.color = 'transparent'; r.style.fontSize = '0'; r.style.lineHeight = '1'; r.style.display = 'flex'; r.style.alignItems = 'center'; r.style.justifyContent = 'center'; }
         });
         el.style.borderColor = '#006D5B'; el.style.background = '#006D5B08';
         const r = el.querySelector('.nemesis-check');
-        if (r) { r.style.borderColor = '#006D5B'; r.style.background = '#006D5B'; r.textContent = '\u2713'; r.style.color = 'white'; r.style.fontSize = '10px'; r.style.fontWeight = '900'; }
+        if (r) { r.style.borderColor = '#006D5B'; r.style.background = '#006D5B'; r.textContent = '\u2713'; r.style.color = 'white'; r.style.fontSize = '11px'; r.style.lineHeight = '1'; r.style.fontWeight = '900'; r.style.display = 'flex'; r.style.alignItems = 'center'; r.style.justifyContent = 'center'; }
     }
 
     // Init: mark home as active in desktop nav
