@@ -1,4 +1,4 @@
-export type ScreenId = "home" | "contract" | "orgs" | "shop" | "bite";
+export type ScreenId = "home" | "contract" | "orgs" | "shop" | "bite" | "sync";
 
 export type Pact = {
   id: string;
@@ -7,6 +7,19 @@ export type Pact = {
   daysRemaining: number;
   status: "on_track" | "danger";
   progressPercent: number;
+  // Transaction sync fields (populated after first sync)
+  category?: string;
+  spendingLimit?: number;
+  spentEuro?: number;
+};
+
+export type Transaction = {
+  id: string;
+  name: string;
+  amount: number;
+  date: string;
+  category: string;
+  isMock: boolean;
 };
 
 export type Organization = {

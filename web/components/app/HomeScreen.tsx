@@ -111,7 +111,11 @@ export function HomeScreen({ pacts, onOpenContract, onOpenAddOrg, onTriggerFailu
                 </div>
 
                 <div className="mt-1.5 flex justify-between">
-                  <span className="font-[var(--font-mono)] text-xs text-muted">Day {isDanger ? "6/7" : "4/7"}</span>
+                  <span className="font-[var(--font-mono)] text-xs text-muted">
+                    {pact.spendingLimit != null
+                      ? `€${pact.spentEuro ?? 0} / €${pact.spendingLimit}`
+                      : `Day ${isDanger ? "6/7" : "4/7"}`}
+                  </span>
                   {isDanger ? (
                     <span className="font-[var(--font-mono)] text-xs font-bold text-coral">
                       <AlertTriangle className="mr-1 inline h-3 w-3" /> Danger zone
