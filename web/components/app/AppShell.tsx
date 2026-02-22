@@ -10,6 +10,7 @@ import { ShopScreen } from "@/components/app/ShopScreen";
 import { SyncScreen } from "@/components/app/SyncScreen";
 import { FailureScreen } from "@/features/failures/components/FailureScreen";
 import type { FailurePayload, Organization, Pact, ScreenId, Transaction } from "@/types/domain";
+import { PLAID_USER_ID } from "@/components/app/PlaidConnectButton";
 
 const API = "http://localhost:8000";
 
@@ -68,6 +69,7 @@ export function AppShell() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [lastSynced, setLastSynced] = useState<Date | null>(null);
   const [apiReachable, setApiReachable] = useState(false);
+  const [plaidConnected, setPlaidConnected] = useState(false);
 
   const failurePayload: FailurePayload = useMemo(
     () => ({
@@ -80,21 +82,51 @@ export function AppShell() {
 
   // ── Transaction sync ─────────────────────────────────────────────────────
 
-  async function fetchTransactions() {
+  async function fetchTransactions(isPlaidConnected = plaidConnected) {
     try {
-      const res = await fetch(`${API}/api/mock-transactions`);
-      if (!res.ok) throw new Error("non-ok");
-      const data = await res.json();
-      const txns: Transaction[] = (data.transactions ?? []).map(
-        (t: { id: number; name: string; amount: number; date: string; category: string }) => ({
-          id: `mock_${t.id}`,
-          name: t.name,
-          amount: t.amount,
-          date: t.date,
-          category: t.category,
-          isMock: true,
-        })
-      );
+      let txns: Transaction[];
+
+      if (isPlaidConnected) {
+        // Real Plaid transactions (+ mocks merged server-side)
+        const res = await fetch(
+          `${API}/api/plaid/transactions?user_id=${PLAID_USER_ID}&days=30`
+        );
+        if (!res.ok) throw new Error("non-ok");
+        const data = await res.json();
+        txns = (data.transactions ?? []).map(
+          (t: {
+            id: string;
+            name: string;
+            amount: number;
+            date: string;
+            primary_category: string;
+            is_mock: boolean;
+          }) => ({
+            id: t.id,
+            name: t.name,
+            amount: t.amount,
+            date: t.date,
+            category: t.primary_category,
+            isMock: t.is_mock,
+          })
+        );
+      } else {
+        // Mock-only fallback
+        const res = await fetch(`${API}/api/mock-transactions`);
+        if (!res.ok) throw new Error("non-ok");
+        const data = await res.json();
+        txns = (data.transactions ?? []).map(
+          (t: { id: number; name: string; amount: number; date: string; category: string }) => ({
+            id: `mock_${t.id}`,
+            name: t.name,
+            amount: t.amount,
+            date: t.date,
+            category: t.category,
+            isMock: true,
+          })
+        );
+      }
+
       setTransactions(txns);
       setApiReachable(true);
       setPacts((current) => computePactProgress(current, txns));
@@ -102,6 +134,22 @@ export function AppShell() {
     } catch {
       setApiReachable(false);
     }
+  }
+
+  async function checkPlaidStatus() {
+    try {
+      const res = await fetch(`${API}/api/plaid/status?user_id=${PLAID_USER_ID}`);
+      if (!res.ok) return false;
+      const data = await res.json();
+      return Boolean(data.has_access_token);
+    } catch {
+      return false;
+    }
+  }
+
+  async function handlePlaidConnected() {
+    setPlaidConnected(true);
+    await fetchTransactions(true);
   }
 
   async function addMockTransaction(input: {
@@ -132,9 +180,14 @@ export function AppShell() {
     }
   }
 
-  // Auto-sync on mount
+  // On mount: check Plaid status, then fetch with the correct source
+  useEffect(() => {
+    checkPlaidStatus().then((connected) => {
+      setPlaidConnected(connected);
+      fetchTransactions(connected);
+    });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { fetchTransactions(); }, []);
+  }, []);
 
   // ── Org handlers ──────────────────────────────────────────────────────────
 
@@ -215,7 +268,9 @@ export function AppShell() {
             transactions={transactions}
             lastSynced={lastSynced}
             apiReachable={apiReachable}
-            onSync={fetchTransactions}
+            plaidConnected={plaidConnected}
+            onSync={() => fetchTransactions()}
+            onPlaidConnected={handlePlaidConnected}
             onAddTransaction={addMockTransaction}
             onDeleteTransaction={deleteMockTransaction}
           />
