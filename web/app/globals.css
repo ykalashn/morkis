@@ -48,6 +48,16 @@ a {
   background: #ffffff;
 }
 
+@keyframes danger-pulse {
+  0%, 100% { border-color: #FF4B4B; box-shadow: 0 0 0 0 rgba(255, 75, 75, 0); }
+  50% { border-color: #FF4B4B; box-shadow: 0 0 0 6px rgba(255, 75, 75, 0.1); }
+}
+
+.danger-pulse {
+  border-color: #FF4B4B !important;
+  animation: danger-pulse 2s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.001ms !important;

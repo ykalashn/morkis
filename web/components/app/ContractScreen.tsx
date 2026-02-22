@@ -2,8 +2,10 @@
 
 import { Building2, Flame, Globe, HeartCrack, Landmark, Megaphone, UserX } from "lucide-react";
 import { useMemo, useState } from "react";
+import type { Organization } from "@/types/domain";
 
 type ContractScreenProps = {
+  organizations: Organization[];
   onCreate: (input: { title: string; stakeEuro: number }) => void;
 };
 
@@ -25,7 +27,7 @@ const nemesisOptions = [
   { title: "Someone specific", detail: "They get a payment with your name", Icon: UserX }
 ];
 
-export function ContractScreen({ onCreate }: ContractScreenProps) {
+export function ContractScreen({ organizations, onCreate }: ContractScreenProps) {
   const [title, setTitle] = useState("Not order from Wolt this week");
   const [stake, setStake] = useState(30);
   const [duration, setDuration] = useState(7);
@@ -138,6 +140,40 @@ export function ContractScreen({ onCreate }: ContractScreenProps) {
               </button>
             );
           })}
+
+          {organizations.length > 0 && (
+            <>
+              <p className="pt-1 font-[var(--font-mono)] text-[10px] uppercase tracking-widest text-muted">Your organizations</p>
+              {organizations.map((org) => {
+                const selected = org.name === selectedNemesis;
+                return (
+                  <button
+                    key={org.id}
+                    type="button"
+                    onClick={() => setSelectedNemesis(org.name)}
+                    className={`flex w-full items-center gap-3 rounded-xl border-2 p-3 text-left ${
+                      selected ? "border-moss bg-moss/5" : "border-ink/10 bg-cream"
+                    }`}
+                  >
+                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg border-2 border-ink/20 bg-coral/10">
+                      <Building2 className="h-4 w-4 text-coral" />
+                    </span>
+                    <span className="flex-1">
+                      <span className="block font-[var(--font-display)] text-base font-bold">{org.name}</span>
+                      <span className="block font-[var(--font-mono)] text-xs text-muted">{org.type}</span>
+                    </span>
+                    <span
+                      className={`inline-flex h-5 w-5 items-center justify-center rounded-full border-2 text-[10px] font-black ${
+                        selected ? "border-moss bg-moss text-white" : "border-ink/20 text-transparent"
+                      }`}
+                    >
+                      ✓
+                    </span>
+                  </button>
+                );
+              })}
+            </>
+          )}
         </div>
       </div>
 

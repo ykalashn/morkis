@@ -2,13 +2,13 @@
 
 import { useMemo, useState } from "react";
 import type { ComponentType } from "react";
-import { Flame, House, PlusCircle, Store, Users } from "lucide-react";
+import { Building2, Flame, House, PlusCircle, Store } from "lucide-react";
 import { ContractScreen } from "@/components/app/ContractScreen";
-import { GroupScreen } from "@/components/app/GroupScreen";
+import { OrgScreen } from "@/components/app/OrgScreen";
 import { HomeScreen } from "@/components/app/HomeScreen";
 import { ShopScreen } from "@/components/app/ShopScreen";
 import { FailureScreen } from "@/features/failures/components/FailureScreen";
-import type { FailurePayload, Pact, ScreenId } from "@/types/domain";
+import type { FailurePayload, Organization, Pact, ScreenId } from "@/types/domain";
 
 const MONSTER_IMAGE =
   "https://res.cloudinary.com/yevhenii-kalashnyk/image/upload/e_background_removal/c_fill,ar_3:4,g_auto,f_png/v1771693879/Gemini_Generated_Image_3goprg3goprg3gop_l9flik.png";
@@ -21,13 +21,14 @@ const INITIAL_PACTS: Pact[] = [
 const NAV_ITEMS: Array<{ id: Exclude<ScreenId, "bite">; label: string; icon: ComponentType<{ className?: string }> }> = [
   { id: "home", label: "Home", icon: House },
   { id: "contract", label: "Pact", icon: PlusCircle },
-  { id: "group", label: "Group", icon: Users },
+  { id: "orgs", label: "Orgs", icon: Building2 },
   { id: "shop", label: "Shop", icon: Store }
 ];
 
 export function AppShell() {
   const [screen, setScreen] = useState<ScreenId>("home");
   const [pacts, setPacts] = useState<Pact[]>(INITIAL_PACTS);
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
 
   const failurePayload: FailurePayload = useMemo(
     () => ({
@@ -37,6 +38,14 @@ export function AppShell() {
     }),
     [pacts]
   );
+
+  function addOrg(org: Organization) {
+    setOrganizations((current) => [...current, org]);
+  }
+
+  function removeOrg(id: string) {
+    setOrganizations((current) => current.filter((o) => o.id !== id));
+  }
 
   function createPact(input: { title: string; stakeEuro: number }) {
     const nextPact: Pact = {
@@ -93,13 +102,13 @@ export function AppShell() {
           <HomeScreen
             pacts={pacts}
             onOpenContract={() => setScreen("contract")}
-            onOpenGroup={() => setScreen("group")}
+            onOpenAddOrg={() => setScreen("orgs")}
             onTriggerFailure={() => setScreen("bite")}
           />
         ) : null}
 
-        {screen === "contract" ? <ContractScreen onCreate={createPact} /> : null}
-        {screen === "group" ? <GroupScreen onSeal={() => setScreen("home")} /> : null}
+        {screen === "contract" ? <ContractScreen organizations={organizations} onCreate={createPact} /> : null}
+        {screen === "orgs" ? <OrgScreen organizations={organizations} onAdd={addOrg} onRemove={removeOrg} /> : null}
         {screen === "shop" ? <ShopScreen /> : null}
         {screen === "bite" ? <FailureScreen payload={failurePayload} onAcknowledge={() => setScreen("home")} /> : null}
       </main>

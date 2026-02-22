@@ -13,10 +13,12 @@ export function LandingHero() {
           </p>
           <h1 className="mt-4 font-[var(--font-display)] text-5xl font-extrabold leading-tight text-ink">
             Prove you mean it.
+            <br />
+            <span className="text-coral">Or fund your enemy.</span>
           </h1>
           <p className="mt-4 max-w-xl text-lg text-ink/70">
-            Build goals with real stakes. If you fail, your money goes where it hurts and Morkis
-            roasts you with ElevenLabs.
+            Set a spending limit. Pick an org you&apos;d hate to fund. Break your word — and Stripe
+            transfers your stake to them instantly.
           </p>
           <div className="mt-8 flex gap-3">
             <Link

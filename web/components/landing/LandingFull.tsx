@@ -4,18 +4,10 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { ComponentType } from "react";
 import {
-  Beer,
-  BookOpen,
   Coffee,
-  Dumbbell,
   Flame,
-  HeartCrack,
   Landmark,
   Megaphone,
-  PiggyBank,
-  Pizza,
-  Salad,
-  ShoppingCart,
   Store,
   Utensils,
   UtensilsCrossed,
@@ -138,10 +130,13 @@ export function LandingFull() {
           <div>
             <h1 className="font-[var(--font-display)] text-5xl font-extrabold leading-tight sm:text-6xl">
               Prove you mean it.
+              <br />
+              <span className="text-coral">Or fund your enemy.</span>
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-ink/65">
-              Morkis is the AI that monitors your bank feed and <span className="font-semibold text-coral">eats your money</span> if
-              you break your word. Powered by loss aversion.
+              Set a spending limit. Pick an org you&apos;d <span className="font-semibold text-coral">hate</span> to fund.
+              Break your word — and Stripe transfers your stake to them <span className="font-semibold text-ink">instantly</span>.
+              Powered by loss aversion.
             </p>
             <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row md:items-start">
               <Link
@@ -161,9 +156,45 @@ export function LandingFull() {
                 JOIN THE WAITLIST
               </button>
             </div>
+            <div className="mt-5 flex items-center gap-4">
+              <div className="flex items-center gap-1.5">
+                <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-coral" />
+                <span className="font-[var(--font-mono)] text-xs text-muted">312 pacts live</span>
+              </div>
+              <span className="text-ink/20">·</span>
+              <span className="font-[var(--font-mono)] text-xs text-muted">€8,450 at risk right now</span>
+            </div>
           </div>
           <div className="flex justify-center">
             <img src={MONSTER_IMAGE} alt="Morkis Monster" className="w-[340px] max-w-full" />
+          </div>
+        </div>
+      </section>
+
+      {/* HOW IT WORKS */}
+      <section className="border-b border-border bg-cream px-6 py-16 md:py-20">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-12 text-center">
+            <p className="font-[var(--font-display)] text-xs font-bold uppercase tracking-[0.2em] text-ink/40">How it works</p>
+            <h2 className="mt-3 font-[var(--font-display)] text-3xl font-extrabold sm:text-4xl">Three steps. No escape.</h2>
+          </div>
+          <div className="relative grid grid-cols-1 gap-8 md:grid-cols-3 md:gap-12">
+            <div className="absolute left-[calc(16.67%+1.5rem)] right-[calc(16.67%+1.5rem)] top-5 hidden h-px bg-ink/10 md:block" />
+            {[
+              { num: "1", title: "Set your limit", body: "Choose a spending category, set a monthly cap, and put real money on the line.", accent: false },
+              { num: "2", title: "Pick your nemesis", body: "Choose who gets your money if you fail — a politician, a rival, an ideology you oppose. Make it sting.", accent: true },
+              { num: "3", title: "Morkis watches", body: "Your bank is monitored via Plaid. The moment you overspend, Stripe auto-transfers your stake. No mercy.", accent: true }
+            ].map((step) => (
+              <div key={step.num} className="relative z-10 flex flex-col gap-4">
+                <div className={`flex h-12 w-12 items-center justify-center rounded-xl border-2 bg-white font-[var(--font-display)] text-xl font-extrabold shadow-sm ${step.accent ? "border-coral text-coral" : "border-ink"}`}>
+                  {step.num}
+                </div>
+                <div>
+                  <p className="font-[var(--font-display)] text-lg font-bold">{step.title}</p>
+                  <p className="mt-1 text-sm leading-relaxed text-ink/60">{step.body}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -303,10 +334,13 @@ export function LandingFull() {
       <section id="oracle" className="border-b border-border px-6 py-24">
         <div className="mx-auto grid max-w-7xl gap-12 md:grid-cols-5">
           <div className="md:col-span-2">
-            <p className="font-[var(--font-display)] text-xs font-bold uppercase tracking-[0.2em] text-moss">The Oracle</p>
+            <div className="flex items-center gap-2">
+              <p className="font-[var(--font-display)] text-xs font-bold uppercase tracking-[0.2em] text-moss">The Oracle</p>
+              <span className="rounded-full border border-yellow-400/60 bg-yellow-50 px-2 py-0.5 font-[var(--font-mono)] text-[10px] text-ink/50">coming soon</span>
+            </div>
             <h2 className="mt-4 font-[var(--font-display)] text-4xl font-extrabold sm:text-5xl">Integrity Volatility.</h2>
             <p className="mt-4 text-lg text-ink/65">
-              Our data engine analyzes six months of transactions to calculate your integrity score.
+              Morkis will analyze your transaction history to calculate an <span className="font-semibold text-ink">Integrity Score</span> — a measure of how often you actually keep your word. Chronic offenders get higher required stakes.
             </p>
             <div className="mt-6 space-y-3">
               <div className="morkis-card flex items-center justify-between p-4">
@@ -392,65 +426,6 @@ export function LandingFull() {
                 "I saw that 3 AM kebab. Your rival team just got <span className="font-extrabold text-coral not-italic">€20 richer</span>
                 thanks to your lack of discipline. <span className="font-extrabold text-coral not-italic">Pathetic.</span>"
               </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="warroom" className="border-b border-border px-6 py-24">
-        <div className="mx-auto max-w-7xl">
-          <p className="text-center font-[var(--font-display)] text-xs font-bold uppercase tracking-[0.2em] text-moss">
-            The War Room · Miro AI
-          </p>
-          <h2 className="mt-4 text-center font-[var(--font-display)] text-4xl font-extrabold sm:text-5xl">
-            Your habits, dissected.
-          </h2>
-
-          <div className="morkis-card mt-10 overflow-hidden">
-            <div className="grid gap-8 bg-[#FAFAFA] p-8 md:grid-cols-2">
-              <div>
-                <p className="text-center font-[var(--font-display)] text-sm font-bold uppercase tracking-widest text-moss">
-                  Wealth Builders
-                </p>
-                <div className="mt-4 space-y-3">
-                  {[
-                    { label: "Gym Membership", info: "€29.99/mo · 94% attendance", Icon: Dumbbell },
-                    { label: "Storytel Subscription", info: "€9.99/mo · 12 books completed", Icon: BookOpen },
-                    { label: "Savings Transfer", info: "€200/mo · Automated", Icon: PiggyBank },
-                    { label: "Meal Prep Sunday", info: "€35/wk · Consistent 3 months", Icon: Salad }
-                  ].map((item) => (
-                    <article key={item.label} className="rounded-xl border-2 border-moss bg-white p-4">
-                      <p className="font-[var(--font-display)] text-sm font-bold text-moss">
-                        <item.Icon className="mr-1 inline h-4 w-4" />
-                        {item.label}
-                      </p>
-                      <p className="mt-1 font-[var(--font-mono)] text-[10px] text-muted">{item.info}</p>
-                    </article>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <p className="text-center font-[var(--font-display)] text-sm font-bold uppercase tracking-widest text-coral">
-                  Morkis Food
-                </p>
-                <div className="mt-4 space-y-3">
-                  {[
-                    { label: "Late Night Foodora", info: "€180/mo · 73% after midnight", Icon: Pizza },
-                    { label: "Pub Fridays", info: "€120/mo · Always exceeds €40 limit", Icon: Beer },
-                    { label: "Impulse Zalando", info: "€95/mo · 60% items unused", Icon: ShoppingCart },
-                    { label: "Triple Oat Lattes", info: "€65/mo · I deserve it tax", Icon: Coffee }
-                  ].map((item) => (
-                    <article key={item.label} className="rounded-xl border-2 border-coral bg-white p-4">
-                      <p className="font-[var(--font-display)] text-sm font-bold text-coral">
-                        <item.Icon className="mr-1 inline h-4 w-4" />
-                        {item.label}
-                      </p>
-                      <p className="mt-1 font-[var(--font-mono)] text-[10px] text-muted">{item.info}</p>
-                    </article>
-                  ))}
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -562,7 +537,7 @@ export function LandingFull() {
             <span className="text-sm text-muted">Swedish for moral hangover</span>
           </div>
           <p className="font-[var(--font-display)] text-xs uppercase tracking-widest text-ink/40">
-            Monzo · Stripe · ElevenLabs · Miro AI
+            Plaid · Stripe · ElevenLabs
           </p>
           <p className="text-sm text-muted">Built at HackEurope 2026</p>
         </div>
