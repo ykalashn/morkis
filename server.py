@@ -91,6 +91,10 @@ class MockTransactionCreateRequest(BaseModel):
     date: Optional[str] = None
 
 
+class AnalyzePactRequest(BaseModel):
+    title: str
+
+
 # =========================
 # DB helpers
 # =========================
@@ -530,6 +534,74 @@ def failure_roast(payload: RoastRequest):
 
 
 # =========================
+# Pact analysis endpoint
+# =========================
+_VALID_CATEGORIES = [
+    "FOOD_AND_DRINK", "COFFEE", "GENERAL_MERCHANDISE", "TRAVEL",
+    "ENTERTAINMENT", "GROCERIES", "PERSONAL_CARE", "ALCOHOL_AND_BARS",
+]
+
+@app.post("/api/analyze-pact")
+def analyze_pact(payload: AnalyzePactRequest):
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        # Fallback: return a generic config
+        return {
+            "categories": ["FOOD_AND_DRINK"],
+            "merchantKeywords": [],
+            "trackingLabel": payload.title,
+        }
+
+    try:
+        client = openai.OpenAI(api_key=api_key)
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            temperature=0,
+            max_tokens=200,
+            response_format={"type": "json_object"},
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You analyze spending pacts for a financial accountability app. "
+                        "Given a pact title, return ONLY a JSON object with these fields:\n"
+                        "- categories: array from this exact list: "
+                        + str(_VALID_CATEGORIES) + "\n"
+                        "- merchantKeywords: lowercase strings to fuzzy-match against transaction merchant names. "
+                        "Empty array if the pact covers ALL merchants in the category (e.g. 'no coffee at all'). "
+                        "Include name variations and obvious competitors.\n"
+                        "- trackingLabel: 2-5 word human label like 'Wolt & delivery apps' or 'All coffee shops'\n\n"
+                        "Examples:\n"
+                        "'No Wolt this week' → {\"categories\":[\"FOOD_AND_DRINK\"],\"merchantKeywords\":[\"wolt\",\"bolt food\",\"uber eats\",\"foodora\"],\"trackingLabel\":\"Wolt & delivery apps\"}\n"
+                        "'No coffee' → {\"categories\":[\"COFFEE\",\"FOOD_AND_DRINK\"],\"merchantKeywords\":[],\"trackingLabel\":\"All coffee purchases\"}\n"
+                        "'No H&M or Zara' → {\"categories\":[\"GENERAL_MERCHANDISE\"],\"merchantKeywords\":[\"h&m\",\"hm\",\"zara\"],\"trackingLabel\":\"H&M & Zara\"}"
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": f"Pact: {payload.title}",
+                },
+            ],
+        )
+        import json as json_lib
+        result = json_lib.loads(response.choices[0].message.content)
+        # Validate categories
+        result["categories"] = [c for c in result.get("categories", []) if c in _VALID_CATEGORIES]
+        if not result["categories"]:
+            result["categories"] = ["FOOD_AND_DRINK"]
+        result["merchantKeywords"] = [k.lower() for k in result.get("merchantKeywords", [])]
+        result["trackingLabel"] = result.get("trackingLabel", payload.title)[:60]
+        return result
+    except Exception as exc:
+        print(f"[ANALYZE-PACT] Failed: {exc}")
+        return {
+            "categories": ["FOOD_AND_DRINK"],
+            "merchantKeywords": [],
+            "trackingLabel": payload.title,
+        }
+
+
+# =========================
 # Plaid endpoints
 # =========================
 @app.post("/api/plaid/create_link_token")
@@ -601,6 +673,15 @@ def get_transactions(user_id: str, days: int = 90):
 @app.get("/api/plaid/status")
 def plaid_status(user_id: str):
     return {"user_id": user_id, "has_access_token": bool(get_access_token(user_id))}
+
+
+@app.delete("/api/plaid/disconnect")
+def plaid_disconnect(user_id: str):
+    conn = get_conn()
+    conn.execute("DELETE FROM plaid_items WHERE user_id = ?", (user_id,))
+    conn.commit()
+    conn.close()
+    return {"success": True}
 
 
 # =========================

@@ -1,5 +1,11 @@
 export type ScreenId = "home" | "contract" | "orgs" | "shop" | "bite" | "sync";
 
+export type MatchConfig = {
+  categories: string[];
+  merchantKeywords: string[];  // empty = match all merchants in categories
+  trackingLabel: string;       // e.g. "Wolt & food delivery"
+};
+
 export type Pact = {
   id: string;
   title: string;
@@ -7,7 +13,9 @@ export type Pact = {
   daysRemaining: number;
   status: "on_track" | "danger" | "completed" | "lost";
   progressPercent: number;
-  // Transaction sync fields (populated after first sync)
+  // AI-inferred match config (new)
+  matchConfig?: MatchConfig;
+  // Legacy category field (kept for backwards compat with stored pacts)
   category?: string;
   spendingLimit?: number;
   spentEuro?: number;

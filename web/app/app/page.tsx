@@ -1,5 +1,5 @@
-import { AppShell } from "@/components/app/AppShell";
+import { AppShellClient } from "@/components/app/AppShellClient";
 
 export default function AppPage() {
-  return <AppShell />;
+  return <AppShellClient />;
 }

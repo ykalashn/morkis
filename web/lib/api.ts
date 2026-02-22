@@ -1,5 +1,5 @@
 import { API_BASE_URL } from "@/lib/config";
-import type { FailurePayload } from "@/types/domain";
+import type { FailurePayload, MatchConfig } from "@/types/domain";
 
 export async function fetchFailureRoast(payload: FailurePayload): Promise<Blob> {
   const response = await fetch(`${API_BASE_URL}/api/failure-roast`, {
@@ -26,4 +26,14 @@ export async function fetchFailureRoast(payload: FailurePayload): Promise<Blob> 
   }
 
   return response.blob();
+}
+
+export async function analyzePact(title: string): Promise<MatchConfig> {
+  const response = await fetch(`${API_BASE_URL}/api/analyze-pact`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title }),
+  });
+  if (!response.ok) throw new Error("analyze-pact failed");
+  return response.json() as Promise<MatchConfig>;
 }

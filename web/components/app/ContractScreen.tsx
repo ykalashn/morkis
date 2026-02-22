@@ -1,21 +1,48 @@
 "use client";
 
-import { Building2 } from "lucide-react";
-import { useMemo, useState } from "react";
-import type { Organization } from "@/types/domain";
-import { SPENDING_CATEGORIES } from "@/lib/categories";
+import { Building2, Loader2, Sparkles } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { MatchConfig, Organization } from "@/types/domain";
+import { analyzePact } from "@/lib/api";
 
 type ContractScreenProps = {
   organizations: Organization[];
-  onCreate: (input: { title: string; stakeEuro: number; category: string; nemesis: string }) => void;
+  onCreate: (input: { title: string; stakeEuro: number; matchConfig: MatchConfig; nemesis: string }) => void;
 };
+
+type AnalysisState =
+  | { status: "idle" }
+  | { status: "analyzing" }
+  | { status: "done"; config: MatchConfig }
+  | { status: "error" };
 
 export function ContractScreen({ organizations, onCreate }: ContractScreenProps) {
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState(SPENDING_CATEGORIES[0].value);
   const [stake, setStake] = useState(30);
   const [duration, setDuration] = useState(7);
   const [selectedNemesis, setSelectedNemesis] = useState(organizations[0]?.name ?? "");
+  const [analysis, setAnalysis] = useState<AnalysisState>({ status: "idle" });
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Debounce: analyze pact title 700ms after user stops typing
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    const trimmed = title.trim();
+    if (!trimmed) {
+      setAnalysis({ status: "idle" });
+      return;
+    }
+    setAnalysis({ status: "analyzing" });
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const config = await analyzePact(trimmed);
+        setAnalysis({ status: "done", config });
+      } catch {
+        setAnalysis({ status: "error" });
+      }
+    }, 700);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [title]);
 
   const reaction = useMemo(() => {
     if (stake <= 20) return { text: "That all?", color: "text-muted" };
@@ -23,6 +50,13 @@ export function ContractScreen({ organizations, onCreate }: ContractScreenProps)
     if (stake <= 70) return { text: "Now we're talking!", color: "text-moss" };
     return { text: "BRAVE!", color: "text-coral" };
   }, [stake]);
+
+  const canSign = title.trim() && selectedNemesis && analysis.status === "done";
+
+  function handleSign() {
+    if (!canSign || analysis.status !== "done") return;
+    onCreate({ title, stakeEuro: stake, matchConfig: analysis.config, nemesis: selectedNemesis });
+  }
 
   return (
     <section className="mx-auto max-w-lg space-y-5">
@@ -32,46 +66,58 @@ export function ContractScreen({ organizations, onCreate }: ContractScreenProps)
         <p className="mb-2 font-[var(--font-display)] text-sm font-bold uppercase tracking-widest text-ink/40">I promise to...</p>
         <input
           value={title}
-          onChange={(event) => setTitle(event.target.value)}
+          onChange={(e) => setTitle(e.target.value)}
           className="w-full rounded-xl border-2 border-ink/10 bg-cream px-3 py-2.5 font-[var(--font-display)] text-base font-bold outline-none focus:border-moss"
           placeholder="e.g. No Wolt this week"
         />
 
-        <div className="mt-4">
-          <p className="mb-2 font-[var(--font-mono)] text-xs uppercase tracking-[0.2em] text-muted">Track spending in</p>
-          <div className="flex flex-wrap gap-2">
-            {SPENDING_CATEGORIES.map((cat) => (
-              <button
-                key={cat.value}
-                type="button"
-                onClick={() => setCategory(cat.value)}
-                className={`rounded-full border-2 px-3 py-1.5 text-xs font-bold transition ${
-                  category === cat.value
-                    ? "border-moss bg-moss text-white"
-                    : "border-ink/10 bg-cream text-ink/60 hover:border-moss hover:text-moss"
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
+        {/* AI analysis preview */}
+        <div className="mt-3">
+          {analysis.status === "analyzing" && (
+            <div className="flex items-center gap-2 rounded-xl border-2 border-ink/10 bg-cream px-3 py-2">
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-muted" />
+              <p className="font-[var(--font-mono)] text-xs text-muted">Morkis is figuring out what to track...</p>
+            </div>
+          )}
+          {analysis.status === "done" && (
+            <div className="rounded-xl border-2 border-moss/40 bg-moss/5 px-3 py-2.5">
+              <div className="flex items-start gap-2">
+                <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-moss" />
+                <div className="min-w-0">
+                  <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-widest text-moss">Morkis will track</p>
+                  <p className="font-[var(--font-display)] text-sm font-bold text-ink">{analysis.config.trackingLabel}</p>
+                  {analysis.config.merchantKeywords.length > 0 && (
+                    <div className="mt-1.5 flex flex-wrap gap-1">
+                      {analysis.config.merchantKeywords.map((kw) => (
+                        <span key={kw} className="rounded-full bg-moss/10 px-2 py-0.5 font-[var(--font-mono)] text-[10px] text-moss">
+                          {kw}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+          {analysis.status === "error" && (
+            <p className="font-[var(--font-mono)] text-xs text-coral">Could not analyze — check your connection.</p>
+          )}
         </div>
 
-        <div className="my-5 border-t-2 border-dashed border-ink/10" />
+        <div className="mt-4 mb-4 border-t-2 border-dashed border-ink/10" />
 
         <div className="text-center">
           <p className="font-[var(--font-mono)] text-xs uppercase tracking-[0.2em] text-muted">Your Stake</p>
           <p className="font-[var(--font-display)] text-5xl font-extrabold">€{stake}</p>
           <p className={`mt-1 text-xs font-bold ${reaction.color}`}>{reaction.text}</p>
         </div>
-
         <input
           type="range"
           min={1}
           max={100}
           step={1}
           value={stake}
-          onChange={(event) => setStake(Number(event.target.value))}
+          onChange={(e) => setStake(Number(e.target.value))}
           className="mt-3 w-full accent-moss"
         />
         <div className="mt-1 flex justify-between font-[var(--font-mono)] text-xs text-muted">
@@ -146,11 +192,15 @@ export function ContractScreen({ organizations, onCreate }: ContractScreenProps)
 
       <button
         type="button"
-        onClick={() => onCreate({ title, stakeEuro: stake, category, nemesis: selectedNemesis })}
-        disabled={!title.trim() || !selectedNemesis}
+        onClick={handleSign}
+        disabled={!canSign}
         className="morkis-button w-full bg-moss px-6 py-4 text-base uppercase tracking-widest text-white disabled:opacity-40"
       >
-        Sign the Pact
+        {analysis.status === "analyzing" ? (
+          <span className="flex items-center justify-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin" /> Analyzing...
+          </span>
+        ) : "Sign the Pact"}
       </button>
       <p className="text-center font-[var(--font-mono)] text-xs text-muted">By signing, you agree Morkis owns your dignity.</p>
     </section>

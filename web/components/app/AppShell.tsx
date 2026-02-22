@@ -9,7 +9,7 @@ import { HomeScreen } from "@/components/app/HomeScreen";
 import { ShopScreen } from "@/components/app/ShopScreen";
 import { SyncScreen } from "@/components/app/SyncScreen";
 import { FailureScreen } from "@/features/failures/components/FailureScreen";
-import type { FailurePayload, Organization, Pact, ScreenId, Transaction } from "@/types/domain";
+import type { FailurePayload, MatchConfig, Organization, Pact, ScreenId, Transaction } from "@/types/domain";
 import { PLAID_USER_ID } from "@/components/app/PlaidConnectButton";
 
 const API = "http://localhost:8000";
@@ -60,14 +60,28 @@ const NAV_ITEMS: Array<{ id: Exclude<ScreenId, "bite">; label: string; icon: Com
   { id: "sync", label: "Sync", icon: RefreshCw },
 ];
 
+function txnMatchesPact(t: Transaction, pact: Pact): boolean {
+  if (t.amount <= 0) return false;
+  if (pact.matchConfig) {
+    const { categories, merchantKeywords } = pact.matchConfig;
+    const catMatch = categories.length === 0 || categories.includes(t.category);
+    if (!catMatch) return false;
+    if (merchantKeywords.length === 0) return true;
+    const name = t.name.toLowerCase();
+    return merchantKeywords.some((kw) => name.includes(kw));
+  }
+  // Legacy fallback for pacts created before AI matching
+  return pact.category ? t.category === pact.category : false;
+}
+
 /** Pure function — no React state dependency */
 function computePactProgress(pacts: Pact[], transactions: Transaction[]): Pact[] {
   return pacts.map((pact) => {
-    // Don't overwrite terminal states
     if (pact.status === "completed" || pact.status === "lost") return pact;
-    if (!pact.category || pact.spendingLimit == null) return pact;
+    if (!pact.matchConfig && !pact.category) return pact;
+    if (pact.spendingLimit == null) return pact;
 
-    const matching = transactions.filter((t) => t.category === pact.category && t.amount > 0);
+    const matching = transactions.filter((t) => txnMatchesPact(t, pact));
     const spentEuro = Math.round(matching.reduce((sum, t) => sum + t.amount, 0) * 100) / 100;
     const progressPercent = Math.min(100, Math.round((spentEuro / pact.spendingLimit) * 100));
     const status: Pact["status"] =
@@ -92,6 +106,7 @@ export function AppShell() {
   const [userName, setUserName] = useState<string>(() => loadFromStorage("morkis_user_name", "Erik"));
   const [ip, setIp] = useState<number>(() => loadFromStorage("morkis_ip", 2340));
   const [ownedItems, setOwnedItems] = useState<string[]>(() => loadFromStorage("morkis_owned_items", ["Tiny Crown"]));
+  const [equippedItem, setEquippedItem] = useState<string | null>(() => loadFromStorage("morkis_equipped_item", "Tiny Crown"));
   const [pacts, setPacts] = useState<Pact[]>(() => loadFromStorage("morkis_pacts", INITIAL_PACTS));
   const [organizations, setOrganizations] = useState<Organization[]>(() =>
     loadFromStorage("morkis_orgs", [])
@@ -120,6 +135,7 @@ export function AppShell() {
   useEffect(() => { localStorage.setItem("morkis_user_name", JSON.stringify(userName)); }, [userName]);
   useEffect(() => { localStorage.setItem("morkis_ip", JSON.stringify(ip)); }, [ip]);
   useEffect(() => { localStorage.setItem("morkis_owned_items", JSON.stringify(ownedItems)); }, [ownedItems]);
+  useEffect(() => { localStorage.setItem("morkis_equipped_item", JSON.stringify(equippedItem)); }, [equippedItem]);
   useEffect(() => { localStorage.setItem("morkis_pacts", JSON.stringify(pacts)); }, [pacts]);
   useEffect(() => { localStorage.setItem("morkis_orgs", JSON.stringify(organizations)); }, [organizations]);
   useEffect(() => { localStorage.setItem("morkis_local_mocks", JSON.stringify(localMocks)); }, [localMocks]);
@@ -206,6 +222,15 @@ export function AppShell() {
     await fetchTransactions(true);
   }
 
+  async function handlePlaidDisconnect() {
+    try {
+      await fetch(`${API}/api/plaid/disconnect?user_id=${PLAID_USER_ID}`, { method: "DELETE" });
+    } catch { /* ignore — clear locally regardless */ }
+    setPlaidConnected(false);
+    setPlaidTxns([]);
+    setPacts((current) => computePactProgress(current, localMocksRef.current));
+  }
+
   function addMockTransaction(input: { name: string; amount: number; category: string; date: string }) {
     const newTxn: Transaction = {
       id: `mock_${crypto.randomUUID()}`,
@@ -258,7 +283,7 @@ export function AppShell() {
 
   // ── Pact creation ─────────────────────────────────────────────────────────
 
-  function createPact(input: { title: string; stakeEuro: number; category: string; nemesis: string }) {
+  function createPact(input: { title: string; stakeEuro: number; matchConfig: MatchConfig; nemesis: string }) {
     const nextPact: Pact = {
       id: crypto.randomUUID(),
       title: input.title.trim(),
@@ -266,7 +291,7 @@ export function AppShell() {
       daysRemaining: 7,
       status: "on_track",
       progressPercent: 0,
-      category: input.category,
+      matchConfig: input.matchConfig,
       spendingLimit: input.stakeEuro,
       spentEuro: 0,
       nemesis: input.nemesis,
@@ -331,10 +356,12 @@ export function AppShell() {
           <ShopScreen
             ip={ip}
             ownedItems={ownedItems}
+            equippedItem={equippedItem}
             onBuy={(name, cost) => {
               setIp((prev) => prev - cost);
               setOwnedItems((prev) => [...prev, name]);
             }}
+            onEquip={(name) => setEquippedItem((prev) => (prev === name ? null : name))}
           />
         )}
         {screen === "sync" && (
@@ -346,6 +373,7 @@ export function AppShell() {
             plaidConnected={plaidConnected}
             onSync={() => fetchTransactions()}
             onPlaidConnected={handlePlaidConnected}
+            onPlaidDisconnect={handlePlaidDisconnect}
             onAddTransaction={(t) => { addMockTransaction(t); return Promise.resolve(); }}
             onDeleteTransaction={(id) => { deleteMockTransaction(id); return Promise.resolve(); }}
           />
