@@ -75,15 +75,15 @@ export function ContractScreen({ onCreate }: ContractScreenProps) {
 
         <input
           type="range"
-          min={10}
+          min={1}
           max={100}
-          step={5}
+          step={1}
           value={stake}
           onChange={(event) => setStake(Number(event.target.value))}
           className="mt-3 w-full accent-moss"
         />
         <div className="mt-1 flex justify-between font-[var(--font-mono)] text-xs text-muted">
-          <span>€10</span>
+          <span>€1</span>
           <span>€100</span>
         </div>
       </div>
