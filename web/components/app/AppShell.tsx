@@ -62,23 +62,42 @@ function computePactProgress(pacts: Pact[], transactions: Transaction[]): Pact[]
   });
 }
 
+function loadFromStorage<T>(key: string, fallback: T): T {
+  if (typeof window === "undefined") return fallback;
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 export function AppShell() {
   const [screen, setScreen] = useState<ScreenId>("home");
-  const [pacts, setPacts] = useState<Pact[]>(INITIAL_PACTS);
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [userName, setUserName] = useState<string>(() => loadFromStorage("morkis_user_name", "Erik"));
+  const [pacts, setPacts] = useState<Pact[]>(() => loadFromStorage("morkis_pacts", INITIAL_PACTS));
+  const [organizations, setOrganizations] = useState<Organization[]>(() =>
+    loadFromStorage("morkis_orgs", [])
+  );
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [lastSynced, setLastSynced] = useState<Date | null>(null);
   const [apiReachable, setApiReachable] = useState(false);
   const [plaidConnected, setPlaidConnected] = useState(false);
 
-  const failurePayload: FailurePayload = useMemo(
-    () => ({
-      userName: "Erik",
-      failedGoal: pacts.find((p) => p.status === "danger")?.title ?? "your goal",
-      amount: `€${pacts.find((p) => p.status === "danger")?.stakeEuro ?? 30}`,
-    }),
-    [pacts]
-  );
+  // Persist to localStorage whenever state changes
+  useEffect(() => { localStorage.setItem("morkis_user_name", JSON.stringify(userName)); }, [userName]);
+  useEffect(() => { localStorage.setItem("morkis_pacts", JSON.stringify(pacts)); }, [pacts]);
+  useEffect(() => { localStorage.setItem("morkis_orgs", JSON.stringify(organizations)); }, [organizations]);
+
+  const failurePayload: FailurePayload = useMemo(() => {
+    const dangerPact = pacts.find((p) => p.status === "danger");
+    return {
+      userName,
+      failedGoal: dangerPact?.title ?? "your goal",
+      amount: `€${dangerPact?.stakeEuro ?? 30}`,
+      antiCharity: dangerPact?.nemesis ?? "your nemesis",
+    };
+  }, [pacts, userName]);
 
   // ── Transaction sync ─────────────────────────────────────────────────────
 
@@ -201,7 +220,7 @@ export function AppShell() {
 
   // ── Pact creation ─────────────────────────────────────────────────────────
 
-  function createPact(input: { title: string; stakeEuro: number }) {
+  function createPact(input: { title: string; stakeEuro: number; category: string; nemesis: string }) {
     const nextPact: Pact = {
       id: crypto.randomUUID(),
       title: input.title.trim(),
@@ -209,8 +228,13 @@ export function AppShell() {
       daysRemaining: 7,
       status: "on_track",
       progressPercent: 0,
+      category: input.category,
+      spendingLimit: input.stakeEuro,
+      spentEuro: 0,
+      nemesis: input.nemesis,
     };
-    setPacts((current) => [nextPact, ...current]);
+    // Re-evaluate immediately against existing transactions
+    setPacts((current) => computePactProgress([nextPact, ...current], transactions));
     setScreen("home");
   }
 
@@ -254,9 +278,12 @@ export function AppShell() {
         {screen === "home" && (
           <HomeScreen
             pacts={pacts}
+            userName={userName}
+            onChangeUserName={setUserName}
             onOpenContract={() => setScreen("contract")}
             onOpenAddOrg={() => setScreen("orgs")}
             onTriggerFailure={() => setScreen("bite")}
+            onDeletePact={(id) => setPacts((current) => current.filter((p) => p.id !== id))}
           />
         )}
         {screen === "contract" && <ContractScreen organizations={organizations} onCreate={createPact} />}

@@ -1,6 +1,7 @@
 "use client";
 
-import { AlertTriangle, Building2, Coffee, Utensils } from "lucide-react";
+import { AlertTriangle, Building2, Coffee, Pencil, Trash2, Utensils } from "lucide-react";
+import { useRef, useState } from "react";
 import type { Pact } from "@/types/domain";
 
 const MONSTER_IMAGE =
@@ -8,9 +9,12 @@ const MONSTER_IMAGE =
 
 type HomeScreenProps = {
   pacts: Pact[];
+  userName: string;
+  onChangeUserName: (name: string) => void;
   onOpenContract: () => void;
   onOpenAddOrg: () => void;
   onTriggerFailure: () => void;
+  onDeletePact: (id: string) => void;
 };
 
 function PactIcon({ title }: { title: string }) {
@@ -19,15 +23,52 @@ function PactIcon({ title }: { title: string }) {
   return <Utensils className="h-5 w-5 text-moss" />;
 }
 
-export function HomeScreen({ pacts, onOpenContract, onOpenAddOrg, onTriggerFailure }: HomeScreenProps) {
+export function HomeScreen({ pacts, userName, onChangeUserName, onOpenContract, onOpenAddOrg, onTriggerFailure, onDeletePact }: HomeScreenProps) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(userName);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  function startEditing() {
+    setDraft(userName);
+    setEditing(true);
+    setTimeout(() => inputRef.current?.select(), 0);
+  }
+
+  function commitEdit() {
+    const trimmed = draft.trim();
+    if (trimmed) onChangeUserName(trimmed);
+    setEditing(false);
+  }
+
   return (
     <section className="mx-auto max-w-2xl space-y-5">
 
       {/* Greeting */}
       <div className="flex items-center gap-3">
         <img src={MONSTER_IMAGE} alt="Morkis" className="h-12 w-10 object-contain" />
-        <div>
-          <p className="font-[var(--font-display)] text-2xl font-extrabold md:text-3xl">Hey, Erik</p>
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            {editing ? (
+              <input
+                ref={inputRef}
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                onBlur={commitEdit}
+                onKeyDown={(e) => { if (e.key === "Enter") commitEdit(); if (e.key === "Escape") setEditing(false); }}
+                className="w-40 rounded-lg border-2 border-moss bg-transparent px-2 py-0.5 font-[var(--font-display)] text-2xl font-extrabold outline-none md:text-3xl"
+                autoFocus
+              />
+            ) : (
+              <button
+                type="button"
+                onClick={startEditing}
+                className="group flex items-center gap-1.5"
+              >
+                <p className="font-[var(--font-display)] text-2xl font-extrabold md:text-3xl">Hey, {userName}</p>
+                <Pencil className="h-4 w-4 text-muted opacity-0 transition-opacity group-hover:opacity-100" />
+              </button>
+            )}
+          </div>
           <p className="text-sm text-muted">Day 12 of being honest</p>
         </div>
       </div>
@@ -80,8 +121,8 @@ export function HomeScreen({ pacts, onOpenContract, onOpenAddOrg, onTriggerFailu
           {pacts.map((pact) => {
             const isDanger = pact.status === "danger";
             return (
+              <div key={pact.id} className="group relative">
               <button
-                key={pact.id}
                 type="button"
                 onClick={isDanger ? onTriggerFailure : undefined}
                 className={`morkis-card w-full p-4 text-left ${isDanger ? "danger-pulse" : "border-moss/60"}`}
@@ -127,9 +168,18 @@ export function HomeScreen({ pacts, onOpenContract, onOpenAddOrg, onTriggerFailu
 
                 <p className={`mt-2 border-t pt-2 font-[var(--font-mono)] text-[10px] text-muted ${isDanger ? "border-coral/20" : "border-ink/5"}`}>
                   {isDanger ? "One more visit → " : "If you fail → "}
-                  <span className="font-bold text-coral">The Politician gets €{pact.stakeEuro}</span>
+                  <span className="font-bold text-coral">{pact.nemesis ?? "your nemesis"} gets €{pact.stakeEuro}</span>
                 </p>
               </button>
+              <button
+                type="button"
+                onClick={() => onDeletePact(pact.id)}
+                className="absolute right-2 top-2 rounded-lg p-1.5 text-muted opacity-0 transition-opacity group-hover:opacity-100 hover:bg-coral/10 hover:text-coral"
+                aria-label="Delete pact"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+              </div>
             );
           })}
         </div>

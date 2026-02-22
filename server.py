@@ -1,9 +1,12 @@
 import io
 import os
+import random
 import sqlite3
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+import openai
 
 import plaid
 import stripe
@@ -53,6 +56,7 @@ class RoastRequest(BaseModel):
     user_name: str = "friend"
     failed_goal: str = "your goal"
     amount: str = "EUR30"
+    anti_charity: str = "your nemesis"
 
 
 class PlaidLinkTokenRequest(BaseModel):
@@ -403,6 +407,71 @@ def charge_contract(contract_dict: Dict[str, Any]) -> Dict[str, Any]:
 
 
 # =========================
+# OpenAI roast generator
+# =========================
+_ROAST_STYLES = [
+    "a disappointed Scandinavian parent — understated, cold, devastating",
+    "a sarcastic best friend who saw this coming from miles away",
+    "a dramatic Shakespearean narrator making this feel like a Greek tragedy",
+    "a cold corporate CFO reading a quarterly loss report",
+    "a tired life coach who has completely given up on this person",
+    "an enthusiastic sports commentator calling the worst play of the season",
+    "a passive-aggressive accountant who really enjoys their job right now",
+    "a disappointed deity who expected better of humanity",
+]
+
+
+def generate_roast_script(user_name: str, failed_goal: str, amount: str, anti_charity: str) -> str:
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        return (
+            f"{user_name}, you failed '{failed_goal}'. "
+            f"Your {amount} is gone — {anti_charity} just got richer because of you. "
+            "Try again, and mean it this time."
+        )
+
+    style = random.choice(_ROAST_STYLES)
+    try:
+        client = openai.OpenAI(api_key=api_key)
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            temperature=1.1,
+            max_tokens=50,
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        f"You are Morkis, a financial accountability monster. "
+                        f"Speak as {style}. "
+                        "Generate a spoken roast: EXACTLY 1 sentence, maximum 25 words. "
+                        "Be specific and darkly funny. "
+                        "You MUST mention: the person's name, what they failed at, "
+                        "the euro amount lost, and who receives the money. "
+                        "No stage directions, no quotation marks — just the spoken words."
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": (
+                        f"Name: {user_name}\n"
+                        f"Failed pact: {failed_goal}\n"
+                        f"Amount lost: {amount}\n"
+                        f"Money goes to: {anti_charity}"
+                    ),
+                },
+            ],
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as exc:
+        print(f"[OPENAI] Roast generation failed: {exc}")
+        return (
+            f"{user_name}, you failed '{failed_goal}'. "
+            f"Your {amount} now belongs to {anti_charity}. "
+            "Congratulations on funding your enemy."
+        )
+
+
+# =========================
 # Static pages
 # =========================
 @app.get("/")
@@ -430,21 +499,24 @@ def app_html() -> FileResponse:
 # =========================
 @app.post("/api/failure-roast")
 def failure_roast(payload: RoastRequest):
-    api_key = os.getenv("ELEVENLABS_API_KEY")
-    if not api_key:
+    elevenlabs_key = os.getenv("ELEVENLABS_API_KEY")
+    if not elevenlabs_key:
         return JSONResponse(status_code=500, content={"error": "ELEVENLABS_API_KEY is missing in environment"})
 
     voice_id = os.getenv("ELEVENLABS_VOICE_ID", "ysswSXp8U9dFpzPJqFje")
     model_id = os.getenv("ELEVENLABS_MODEL_ID", "eleven_multilingual_v2")
 
-    text = (
-        f"[sighs] {payload.user_name}, you failed '{payload.failed_goal}'. "
-        f"Your stake of {payload.amount} is gone. "
-        "Try again, and mean it this time. [exhales]"
+    # Generate a personalized, varied script with OpenAI
+    text = generate_roast_script(
+        user_name=payload.user_name,
+        failed_goal=payload.failed_goal,
+        amount=payload.amount,
+        anti_charity=payload.anti_charity,
     )
+    print(f"[ROAST] {text}")
 
     try:
-        client = ElevenLabs(api_key=api_key)
+        client = ElevenLabs(api_key=elevenlabs_key)
         audio_stream = client.text_to_speech.convert(
             text=text,
             voice_id=voice_id,

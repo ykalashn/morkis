@@ -10,7 +10,8 @@ export async function fetchFailureRoast(payload: FailurePayload): Promise<Blob> 
     body: JSON.stringify({
       user_name: payload.userName,
       failed_goal: payload.failedGoal,
-      amount: payload.amount
+      amount: payload.amount,
+      anti_charity: payload.antiCharity,
     })
   });
 

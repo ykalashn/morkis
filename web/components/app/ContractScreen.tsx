@@ -3,19 +3,12 @@
 import { Building2, Flame, Globe, HeartCrack, Landmark, Megaphone, UserX } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { Organization } from "@/types/domain";
+import { SPENDING_CATEGORIES } from "@/lib/categories";
 
 type ContractScreenProps = {
   organizations: Organization[];
-  onCreate: (input: { title: string; stakeEuro: number }) => void;
+  onCreate: (input: { title: string; stakeEuro: number; category: string; nemesis: string }) => void;
 };
-
-const presets = [
-  "Not order from Wolt this week",
-  "Max 2 Espresso House visits",
-  "No Zalando purchases",
-  "No alcohol this week",
-  "Gym at least 3 times"
-];
 
 const nemesisOptions = [
   { title: "The Politician", detail: "Funds the campaign you despise", Icon: Landmark },
@@ -28,7 +21,8 @@ const nemesisOptions = [
 ];
 
 export function ContractScreen({ organizations, onCreate }: ContractScreenProps) {
-  const [title, setTitle] = useState("Not order from Wolt this week");
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState(SPENDING_CATEGORIES[0].value);
   const [stake, setStake] = useState(30);
   const [duration, setDuration] = useState(7);
   const [selectedNemesis, setSelectedNemesis] = useState("The Politician");
@@ -45,26 +39,32 @@ export function ContractScreen({ organizations, onCreate }: ContractScreenProps)
       <h2 className="font-[var(--font-display)] text-3xl font-extrabold">New Pact</h2>
 
       <div className="morkis-card border-dashed border-moss p-5">
-        <p className="mb-3 font-[var(--font-mono)] text-xs uppercase tracking-[0.2em] text-muted">Smart Contract - Draft</p>
         <p className="mb-2 font-[var(--font-display)] text-sm font-bold uppercase tracking-widest text-ink/40">I promise to...</p>
         <input
           value={title}
           onChange={(event) => setTitle(event.target.value)}
           className="w-full rounded-xl border-2 border-ink/10 bg-cream px-3 py-2.5 font-[var(--font-display)] text-base font-bold outline-none focus:border-moss"
-          placeholder="Type your promise here"
+          placeholder="e.g. No Wolt this week"
         />
 
-        <div className="mt-3 flex flex-wrap gap-2">
-          {presets.map((preset) => (
-            <button
-              key={preset}
-              type="button"
-              onClick={() => setTitle(preset)}
-              className="rounded-full border-2 border-ink/10 bg-cream px-3 py-2 text-sm font-semibold text-ink/60 hover:border-moss hover:text-moss"
-            >
-              {preset.replace("Not order from ", "No ").replace(" this week", "")}
-            </button>
-          ))}
+        <div className="mt-4">
+          <p className="mb-2 font-[var(--font-mono)] text-xs uppercase tracking-[0.2em] text-muted">Track spending in</p>
+          <div className="flex flex-wrap gap-2">
+            {SPENDING_CATEGORIES.map((cat) => (
+              <button
+                key={cat.value}
+                type="button"
+                onClick={() => setCategory(cat.value)}
+                className={`rounded-full border-2 px-3 py-1.5 text-xs font-bold transition ${
+                  category === cat.value
+                    ? "border-moss bg-moss text-white"
+                    : "border-ink/10 bg-cream text-ink/60 hover:border-moss hover:text-moss"
+                }`}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="my-5 border-t-2 border-dashed border-ink/10" />
@@ -179,8 +179,9 @@ export function ContractScreen({ organizations, onCreate }: ContractScreenProps)
 
       <button
         type="button"
-        onClick={() => onCreate({ title, stakeEuro: stake })}
-        className="morkis-button w-full bg-moss px-6 py-4 text-base uppercase tracking-widest text-white"
+        onClick={() => onCreate({ title, stakeEuro: stake, category, nemesis: selectedNemesis })}
+        disabled={!title.trim()}
+        className="morkis-button w-full bg-moss px-6 py-4 text-base uppercase tracking-widest text-white disabled:opacity-40"
       >
         Sign the Pact
       </button>

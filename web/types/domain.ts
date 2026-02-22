@@ -11,6 +11,7 @@ export type Pact = {
   category?: string;
   spendingLimit?: number;
   spentEuro?: number;
+  nemesis?: string;
 };
 
 export type Transaction = {
@@ -34,4 +35,5 @@ export type FailurePayload = {
   userName: string;
   failedGoal: string;
   amount: string;
+  antiCharity: string;
 };

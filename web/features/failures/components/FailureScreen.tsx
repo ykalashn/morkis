@@ -50,7 +50,7 @@ export function FailureScreen({ payload, onAcknowledge }: FailureScreenProps) {
           <div className="flex justify-between"><span className="font-[var(--font-mono)] text-xs uppercase text-muted">Broken</span><span className="font-[var(--font-display)] font-bold text-coral">Thu 01:47 AM</span></div>
           <div className="flex justify-between"><span className="font-[var(--font-mono)] text-xs uppercase text-muted">Trigger</span><span className="font-[var(--font-display)] font-bold">Wolt — €34.90</span></div>
           <div className="flex justify-between"><span className="font-[var(--font-mono)] text-xs uppercase text-muted">Detected by</span><span className="font-[var(--font-display)] font-bold">Tink Open Banking</span></div>
-          <div className="flex justify-between"><span className="font-[var(--font-mono)] text-xs uppercase text-muted">Sent to</span><span className="font-[var(--font-display)] font-bold text-coral">The Politician</span></div>
+          <div className="flex justify-between"><span className="font-[var(--font-mono)] text-xs uppercase text-muted">Sent to</span><span className="font-[var(--font-display)] font-bold text-coral">{payload.antiCharity}</span></div>
         </div>
       </div>
 
@@ -58,7 +58,7 @@ export function FailureScreen({ payload, onAcknowledge }: FailureScreenProps) {
         <p className="font-[var(--font-display)] text-sm font-bold uppercase tracking-widest text-coral">Your Roast</p>
         <div className="mt-2 rounded-xl border-2 border-ink/5 bg-cream p-3">
           <p className="font-[var(--font-display)] text-sm italic leading-relaxed text-ink/70">
-            "Oh look, Erik ordered Wolt at 1:47 AM. The Politician just got <span className="font-extrabold text-coral not-italic">{payload.amount} richer.</span>"
+            "Oh look, {payload.userName} failed &quot;{payload.failedGoal}&quot;. {payload.antiCharity} just got <span className="font-extrabold text-coral not-italic">{payload.amount} richer.</span>"
           </p>
         </div>
 
