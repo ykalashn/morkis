@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, Flame, Globe, HeartCrack, Landmark, Megaphone, UserX } from "lucide-react";
+import { Building2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { Organization } from "@/types/domain";
 import { SPENDING_CATEGORIES } from "@/lib/categories";
@@ -10,22 +10,12 @@ type ContractScreenProps = {
   onCreate: (input: { title: string; stakeEuro: number; category: string; nemesis: string }) => void;
 };
 
-const nemesisOptions = [
-  { title: "The Politician", detail: "Funds the campaign you despise", Icon: Landmark },
-  { title: "The Ex", detail: "Swish payment with your name on it", Icon: HeartCrack },
-  { title: "The Influencer", detail: "Sponsors the most insufferable creator", Icon: Megaphone },
-  { title: "The Anti-Cause", detail: "Funds an org against your values", Icon: Flame },
-  { title: "A lobbying group you hate", detail: "Donation to their advocacy fund", Icon: Building2 },
-  { title: "The cause you oppose most", detail: "Your stake becomes their donation", Icon: Globe },
-  { title: "Someone specific", detail: "They get a payment with your name", Icon: UserX }
-];
-
 export function ContractScreen({ organizations, onCreate }: ContractScreenProps) {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState(SPENDING_CATEGORIES[0].value);
   const [stake, setStake] = useState(30);
   const [duration, setDuration] = useState(7);
-  const [selectedNemesis, setSelectedNemesis] = useState("The Politician");
+  const [selectedNemesis, setSelectedNemesis] = useState(organizations[0]?.name ?? "");
 
   const reaction = useMemo(() => {
     if (stake <= 20) return { text: "That all?", color: "text-muted" };
@@ -111,76 +101,53 @@ export function ContractScreen({ organizations, onCreate }: ContractScreenProps)
       <div>
         <p className="font-[var(--font-display)] text-sm font-bold uppercase tracking-widest">If you fail, your money goes to...</p>
         <p className="mb-3 font-[var(--font-mono)] text-xs text-muted">Pick something you would hate to fund. That is the point.</p>
-        <div className="space-y-2">
-          {nemesisOptions.map((option) => {
-            const selected = option.title === selectedNemesis;
-            return (
-              <button
-                key={option.title}
-                type="button"
-                onClick={() => setSelectedNemesis(option.title)}
-                className={`flex w-full items-center gap-3 rounded-xl border-2 p-3 text-left ${
-                  selected ? "border-moss bg-moss/5" : "border-ink/10 bg-cream"
-                }`}
-              >
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg border-2 border-ink/20 bg-coral/10">
-                  <option.Icon className="h-4 w-4 text-coral" />
-                </span>
-                <span className="flex-1">
-                  <span className="block font-[var(--font-display)] text-base font-bold">{option.title}</span>
-                  <span className="block font-[var(--font-mono)] text-xs text-muted">{option.detail}</span>
-                </span>
-                <span
-                  className={`inline-flex h-5 w-5 items-center justify-center rounded-full border-2 text-[10px] font-black ${
-                    selected ? "border-moss bg-moss text-white" : "border-ink/20 text-transparent"
+
+        {organizations.length === 0 ? (
+          <div className="morkis-card flex flex-col items-center gap-2 p-6 text-center">
+            <Building2 className="h-6 w-6 text-muted" />
+            <p className="font-[var(--font-display)] text-sm font-bold">No organizations yet</p>
+            <p className="font-[var(--font-mono)] text-xs text-muted">
+              Go to Orgs and add at least one org you&apos;d hate to fund.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {organizations.map((org) => {
+              const selected = org.name === selectedNemesis;
+              return (
+                <button
+                  key={org.id}
+                  type="button"
+                  onClick={() => setSelectedNemesis(org.name)}
+                  className={`flex w-full items-center gap-3 rounded-xl border-2 p-3 text-left ${
+                    selected ? "border-moss bg-moss/5" : "border-ink/10 bg-cream"
                   }`}
                 >
-                  ✓
-                </span>
-              </button>
-            );
-          })}
-
-          {organizations.length > 0 && (
-            <>
-              <p className="pt-1 font-[var(--font-mono)] text-[10px] uppercase tracking-widest text-muted">Your organizations</p>
-              {organizations.map((org) => {
-                const selected = org.name === selectedNemesis;
-                return (
-                  <button
-                    key={org.id}
-                    type="button"
-                    onClick={() => setSelectedNemesis(org.name)}
-                    className={`flex w-full items-center gap-3 rounded-xl border-2 p-3 text-left ${
-                      selected ? "border-moss bg-moss/5" : "border-ink/10 bg-cream"
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg border-2 border-ink/20 bg-coral/10">
+                    <Building2 className="h-4 w-4 text-coral" />
+                  </span>
+                  <span className="flex-1">
+                    <span className="block font-[var(--font-display)] text-base font-bold">{org.name}</span>
+                    <span className="block font-[var(--font-mono)] text-xs text-muted">{org.type}</span>
+                  </span>
+                  <span
+                    className={`inline-flex h-5 w-5 items-center justify-center rounded-full border-2 text-[10px] font-black ${
+                      selected ? "border-moss bg-moss text-white" : "border-ink/20 text-transparent"
                     }`}
                   >
-                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg border-2 border-ink/20 bg-coral/10">
-                      <Building2 className="h-4 w-4 text-coral" />
-                    </span>
-                    <span className="flex-1">
-                      <span className="block font-[var(--font-display)] text-base font-bold">{org.name}</span>
-                      <span className="block font-[var(--font-mono)] text-xs text-muted">{org.type}</span>
-                    </span>
-                    <span
-                      className={`inline-flex h-5 w-5 items-center justify-center rounded-full border-2 text-[10px] font-black ${
-                        selected ? "border-moss bg-moss text-white" : "border-ink/20 text-transparent"
-                      }`}
-                    >
-                      ✓
-                    </span>
-                  </button>
-                );
-              })}
-            </>
-          )}
-        </div>
+                    ✓
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <button
         type="button"
         onClick={() => onCreate({ title, stakeEuro: stake, category, nemesis: selectedNemesis })}
-        disabled={!title.trim()}
+        disabled={!title.trim() || !selectedNemesis}
         className="morkis-button w-full bg-moss px-6 py-4 text-base uppercase tracking-widest text-white disabled:opacity-40"
       >
         Sign the Pact

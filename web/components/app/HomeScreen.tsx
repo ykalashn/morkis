@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, Building2, Coffee, Pencil, Trash2, Utensils } from "lucide-react";
+import { AlertTriangle, Building2, CheckCircle2, Coffee, Pencil, Trash2, Utensils, XCircle } from "lucide-react";
 import { useRef, useState } from "react";
 import type { Pact } from "@/types/domain";
 
@@ -15,6 +15,7 @@ type HomeScreenProps = {
   onOpenAddOrg: () => void;
   onTriggerFailure: () => void;
   onDeletePact: (id: string) => void;
+  onViewReceipt: (pact: Pact) => void;
 };
 
 function PactIcon({ title }: { title: string }) {
@@ -23,7 +24,7 @@ function PactIcon({ title }: { title: string }) {
   return <Utensils className="h-5 w-5 text-moss" />;
 }
 
-export function HomeScreen({ pacts, userName, onChangeUserName, onOpenContract, onOpenAddOrg, onTriggerFailure, onDeletePact }: HomeScreenProps) {
+export function HomeScreen({ pacts, userName, onChangeUserName, onOpenContract, onOpenAddOrg, onTriggerFailure, onDeletePact, onViewReceipt }: HomeScreenProps) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(userName);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -105,85 +106,155 @@ export function HomeScreen({ pacts, userName, onChangeUserName, onOpenContract, 
       </div>
 
       {/* Active Pacts */}
-      <div>
-        <div className="mb-3 flex items-center justify-between">
-          <p className="font-[var(--font-display)] text-base font-bold uppercase tracking-widest">Active Pacts</p>
-          <button
-            type="button"
-            onClick={onOpenContract}
-            className="font-[var(--font-display)] text-sm font-bold uppercase tracking-widest text-moss"
-          >
-            + New
-          </button>
-        </div>
+      {(() => {
+        const activePacts = pacts.filter((p) => p.status === "on_track" || p.status === "danger");
+        const pastPacts = pacts.filter((p) => p.status === "completed" || p.status === "lost");
 
-        <div className="space-y-3">
-          {pacts.map((pact) => {
-            const isDanger = pact.status === "danger";
-            return (
-              <div key={pact.id} className="group relative">
-              <button
-                type="button"
-                onClick={isDanger ? onTriggerFailure : undefined}
-                className={`morkis-card w-full p-4 text-left ${isDanger ? "danger-pulse" : "border-moss/60"}`}
-              >
-                <div className="mb-3 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`inline-flex h-10 w-10 items-center justify-center rounded-lg border-2 ${isDanger ? "border-coral bg-coral/10" : "border-moss bg-moss/10"}`}>
-                      <PactIcon title={pact.title} />
-                    </div>
-                    <div>
-                      <p className="font-[var(--font-display)] text-base font-bold text-ink">{pact.title}</p>
-                      <p className={`font-[var(--font-mono)] text-xs ${isDanger ? "text-coral" : "text-muted"}`}>
-                        {isDanger ? "2/2 used — careful!" : `${pact.daysRemaining} days remaining`}
-                      </p>
-                    </div>
-                  </div>
-                  <p className={`font-[var(--font-display)] text-base font-extrabold ${isDanger ? "text-coral" : "text-moss"}`}>
-                    €{pact.stakeEuro}
-                  </p>
-                </div>
-
-                <div className="h-3 w-full overflow-hidden rounded-full border-2 border-ink/10 bg-cream">
-                  <div
-                    className={`h-full rounded-full ${isDanger ? "bg-coral" : "bg-moss"}`}
-                    style={{ width: `${pact.progressPercent}%` }}
-                  />
-                </div>
-
-                <div className="mt-1.5 flex justify-between">
-                  <span className="font-[var(--font-mono)] text-xs text-muted">
-                    {pact.spendingLimit != null
-                      ? `€${pact.spentEuro ?? 0} / €${pact.spendingLimit}`
-                      : `Day ${isDanger ? "6/7" : "4/7"}`}
-                  </span>
-                  {isDanger ? (
-                    <span className="font-[var(--font-mono)] text-xs font-bold text-coral">
-                      <AlertTriangle className="mr-1 inline h-3 w-3" /> Danger zone
-                    </span>
-                  ) : (
-                    <span className="font-[var(--font-mono)] text-xs font-bold text-moss">On track ✓</span>
-                  )}
-                </div>
-
-                <p className={`mt-2 border-t pt-2 font-[var(--font-mono)] text-[10px] text-muted ${isDanger ? "border-coral/20" : "border-ink/5"}`}>
-                  {isDanger ? "One more visit → " : "If you fail → "}
-                  <span className="font-bold text-coral">{pact.nemesis ?? "your nemesis"} gets €{pact.stakeEuro}</span>
-                </p>
-              </button>
-              <button
-                type="button"
-                onClick={() => onDeletePact(pact.id)}
-                className="absolute right-2 top-2 rounded-lg p-1.5 text-muted opacity-0 transition-opacity group-hover:opacity-100 hover:bg-coral/10 hover:text-coral"
-                aria-label="Delete pact"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
+        return (
+          <>
+            <div>
+              <div className="mb-3 flex items-center justify-between">
+                <p className="font-[var(--font-display)] text-base font-bold uppercase tracking-widest">Active Pacts</p>
+                <button
+                  type="button"
+                  onClick={onOpenContract}
+                  className="font-[var(--font-display)] text-sm font-bold uppercase tracking-widest text-moss"
+                >
+                  + New
+                </button>
               </div>
-            );
-          })}
-        </div>
-      </div>
+
+              {activePacts.length === 0 ? (
+                <div className="morkis-card p-6 text-center">
+                  <p className="font-[var(--font-mono)] text-xs text-muted">No active pacts. Make one.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {activePacts.map((pact) => {
+                    const isDanger = pact.status === "danger";
+                    return (
+                      <div key={pact.id} className="group relative">
+                        <button
+                          type="button"
+                          onClick={isDanger ? onTriggerFailure : undefined}
+                          className={`morkis-card w-full p-4 text-left ${isDanger ? "danger-pulse" : "border-moss/60"}`}
+                        >
+                          <div className="mb-3 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className={`inline-flex h-10 w-10 items-center justify-center rounded-lg border-2 ${isDanger ? "border-coral bg-coral/10" : "border-moss bg-moss/10"}`}>
+                                <PactIcon title={pact.title} />
+                              </div>
+                              <div>
+                                <p className="font-[var(--font-display)] text-base font-bold text-ink">{pact.title}</p>
+                                <p className={`font-[var(--font-mono)] text-xs ${isDanger ? "text-coral" : "text-muted"}`}>
+                                  {isDanger ? "2/2 used — careful!" : `${pact.daysRemaining} days remaining`}
+                                </p>
+                              </div>
+                            </div>
+                            <p className={`font-[var(--font-display)] text-base font-extrabold ${isDanger ? "text-coral" : "text-moss"}`}>
+                              €{pact.stakeEuro}
+                            </p>
+                          </div>
+
+                          <div className="h-3 w-full overflow-hidden rounded-full border-2 border-ink/10 bg-cream">
+                            <div
+                              className={`h-full rounded-full ${isDanger ? "bg-coral" : "bg-moss"}`}
+                              style={{ width: `${pact.progressPercent}%` }}
+                            />
+                          </div>
+
+                          <div className="mt-1.5 flex justify-between">
+                            <span className="font-[var(--font-mono)] text-xs text-muted">
+                              {pact.spendingLimit != null
+                                ? `€${pact.spentEuro ?? 0} / €${pact.spendingLimit}`
+                                : `Day ${isDanger ? "6/7" : "4/7"}`}
+                            </span>
+                            {isDanger ? (
+                              <span className="font-[var(--font-mono)] text-xs font-bold text-coral">
+                                <AlertTriangle className="mr-1 inline h-3 w-3" /> Danger zone
+                              </span>
+                            ) : (
+                              <span className="font-[var(--font-mono)] text-xs font-bold text-moss">On track ✓</span>
+                            )}
+                          </div>
+
+                          <p className={`mt-2 border-t pt-2 font-[var(--font-mono)] text-[10px] text-muted ${isDanger ? "border-coral/20" : "border-ink/5"}`}>
+                            {isDanger ? "One more visit → " : "If you fail → "}
+                            <span className="font-bold text-coral">{pact.nemesis ?? "your nemesis"} gets €{pact.stakeEuro}</span>
+                          </p>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onDeletePact(pact.id)}
+                          className="absolute right-2 top-2 rounded-lg p-1.5 text-muted opacity-0 transition-opacity group-hover:opacity-100 hover:bg-coral/10 hover:text-coral"
+                          aria-label="Delete pact"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Past Pacts */}
+            {pastPacts.length > 0 && (
+              <div>
+                <div className="mb-3">
+                  <p className="font-[var(--font-display)] text-base font-bold uppercase tracking-widest text-ink/40">Past Pacts</p>
+                  <p className="font-[var(--font-mono)] text-xs text-muted">These are over — nothing left to do.</p>
+                </div>
+                <div className="space-y-2">
+                  {pastPacts.map((pact) => {
+                    const won = pact.status === "completed";
+                    return (
+                      <div key={pact.id} className="group relative">
+                        <div className="morkis-card flex items-center gap-3 p-3 opacity-60">
+                          <div className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border-2 ${won ? "border-moss/40 bg-moss/5" : "border-coral/40 bg-coral/5"}`}>
+                            {won
+                              ? <CheckCircle2 className="h-4 w-4 text-moss" />
+                              : <XCircle className="h-4 w-4 text-coral" />
+                            }
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-[var(--font-display)] text-sm font-bold text-ink line-through decoration-ink/30">
+                              {pact.title}
+                            </p>
+                            <p className="font-[var(--font-mono)] text-xs text-muted">
+                              {won ? "Kept your word ✓" : `Failed — €${pact.stakeEuro} sent to ${pact.nemesis ?? "nemesis"}`}
+                            </p>
+                            {!won && (
+                              <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); onViewReceipt(pact); }}
+                                className="mt-1 font-[var(--font-mono)] text-[10px] uppercase tracking-widest text-coral underline underline-offset-2"
+                              >
+                                View Receipt
+                              </button>
+                            )}
+                          </div>
+                          <p className={`font-[var(--font-display)] text-sm font-extrabold ${won ? "text-moss" : "text-coral"}`}>
+                            €{pact.stakeEuro}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => onDeletePact(pact.id)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-muted opacity-0 transition-opacity group-hover:opacity-100 hover:bg-coral/10 hover:text-coral"
+                          aria-label="Delete pact"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </>
+        );
+      })()}
 
       {/* Actions */}
       <div className="grid grid-cols-2 gap-3 pt-1">

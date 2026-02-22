@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ComponentType } from "react";
 import { Building2, Flame, House, PlusCircle, RefreshCw, Store } from "lucide-react";
 import { ContractScreen } from "@/components/app/ContractScreen";
@@ -38,6 +38,18 @@ const INITIAL_PACTS: Pact[] = [
     category: "COFFEE",
     spendingLimit: 20,
   },
+  {
+    id: "pact-3",
+    title: "No Zalando last week",
+    stakeEuro: 50,
+    daysRemaining: 0,
+    status: "completed",
+    progressPercent: 42,
+    category: "GENERAL_MERCHANDISE",
+    spendingLimit: 50,
+    spentEuro: 21,
+    nemesis: "The Rival",
+  },
 ];
 
 const NAV_ITEMS: Array<{ id: Exclude<ScreenId, "bite">; label: string; icon: ComponentType<{ className?: string }> }> = [
@@ -51,12 +63,15 @@ const NAV_ITEMS: Array<{ id: Exclude<ScreenId, "bite">; label: string; icon: Com
 /** Pure function — no React state dependency */
 function computePactProgress(pacts: Pact[], transactions: Transaction[]): Pact[] {
   return pacts.map((pact) => {
+    // Don't overwrite terminal states
+    if (pact.status === "completed" || pact.status === "lost") return pact;
     if (!pact.category || pact.spendingLimit == null) return pact;
 
     const matching = transactions.filter((t) => t.category === pact.category && t.amount > 0);
     const spentEuro = Math.round(matching.reduce((sum, t) => sum + t.amount, 0) * 100) / 100;
     const progressPercent = Math.min(100, Math.round((spentEuro / pact.spendingLimit) * 100));
-    const status: "on_track" | "danger" = progressPercent >= 75 ? "danger" : "on_track";
+    const status: Pact["status"] =
+      progressPercent >= 100 ? "lost" : progressPercent >= 75 ? "danger" : "on_track";
 
     return { ...pact, spentEuro, progressPercent, status };
   });
@@ -75,83 +90,103 @@ function loadFromStorage<T>(key: string, fallback: T): T {
 export function AppShell() {
   const [screen, setScreen] = useState<ScreenId>("home");
   const [userName, setUserName] = useState<string>(() => loadFromStorage("morkis_user_name", "Erik"));
+  const [ip, setIp] = useState<number>(() => loadFromStorage("morkis_ip", 2340));
+  const [ownedItems, setOwnedItems] = useState<string[]>(() => loadFromStorage("morkis_owned_items", ["Tiny Crown"]));
   const [pacts, setPacts] = useState<Pact[]>(() => loadFromStorage("morkis_pacts", INITIAL_PACTS));
   const [organizations, setOrganizations] = useState<Organization[]>(() =>
     loadFromStorage("morkis_orgs", [])
   );
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  // Local mock transactions — stored in localStorage, no server needed
+  const [localMocks, setLocalMocks] = useState<Transaction[]>(() => loadFromStorage("morkis_local_mocks", []));
+  // Real transactions from Plaid (only populated when bank is connected)
+  const [plaidTxns, setPlaidTxns] = useState<Transaction[]>([]);
+  // Merged view used everywhere
+  const transactions = useMemo(() => [...plaidTxns, ...localMocks], [plaidTxns, localMocks]);
+
   const [lastSynced, setLastSynced] = useState<Date | null>(null);
   const [apiReachable, setApiReachable] = useState(false);
   const [plaidConnected, setPlaidConnected] = useState(false);
+  const [activeLostPact, setActiveLostPact] = useState<Pact | null>(null);
+
+  // Refs so async functions always see latest values without stale closure
+  const pactsRef = useRef(pacts);
+  useEffect(() => { pactsRef.current = pacts; }, [pacts]);
+  const plaidTxnsRef = useRef(plaidTxns);
+  useEffect(() => { plaidTxnsRef.current = plaidTxns; }, [plaidTxns]);
+  const localMocksRef = useRef(localMocks);
+  useEffect(() => { localMocksRef.current = localMocks; }, [localMocks]);
 
   // Persist to localStorage whenever state changes
   useEffect(() => { localStorage.setItem("morkis_user_name", JSON.stringify(userName)); }, [userName]);
+  useEffect(() => { localStorage.setItem("morkis_ip", JSON.stringify(ip)); }, [ip]);
+  useEffect(() => { localStorage.setItem("morkis_owned_items", JSON.stringify(ownedItems)); }, [ownedItems]);
   useEffect(() => { localStorage.setItem("morkis_pacts", JSON.stringify(pacts)); }, [pacts]);
   useEffect(() => { localStorage.setItem("morkis_orgs", JSON.stringify(organizations)); }, [organizations]);
+  useEffect(() => { localStorage.setItem("morkis_local_mocks", JSON.stringify(localMocks)); }, [localMocks]);
 
   const failurePayload: FailurePayload = useMemo(() => {
-    const dangerPact = pacts.find((p) => p.status === "danger");
+    const sourcePact = activeLostPact ?? pacts.find((p) => p.status === "danger");
+    const lastTxn = sourcePact?.category
+      ? transactions
+          .filter((t) => t.category === sourcePact.category && t.amount > 0)
+          .sort((a, b) => b.date.localeCompare(a.date))[0]
+      : undefined;
     return {
       userName,
-      failedGoal: dangerPact?.title ?? "your goal",
-      amount: `€${dangerPact?.stakeEuro ?? 30}`,
-      antiCharity: dangerPact?.nemesis ?? "your nemesis",
+      failedGoal: sourcePact?.title ?? "your goal",
+      amount: `€${sourcePact?.stakeEuro ?? 30}`,
+      antiCharity: sourcePact?.nemesis ?? "your nemesis",
+      trigger: lastTxn ? `${lastTxn.name} — €${lastTxn.amount.toFixed(2)}` : undefined,
     };
-  }, [pacts, userName]);
+  }, [activeLostPact, pacts, transactions, userName]);
 
   // ── Transaction sync ─────────────────────────────────────────────────────
 
   async function fetchTransactions(isPlaidConnected = plaidConnected) {
-    try {
-      let txns: Transaction[];
+    let fetchedPlaid: Transaction[] = [];
 
-      if (isPlaidConnected) {
-        // Real Plaid transactions (+ mocks merged server-side)
+    if (isPlaidConnected) {
+      try {
         const res = await fetch(
           `${API}/api/plaid/transactions?user_id=${PLAID_USER_ID}&days=30`
         );
         if (!res.ok) throw new Error("non-ok");
         const data = await res.json();
-        txns = (data.transactions ?? []).map(
-          (t: {
-            id: string;
-            name: string;
-            amount: number;
-            date: string;
-            primary_category: string;
-            is_mock: boolean;
+        fetchedPlaid = (data.transactions ?? [])
+          .filter((t: { is_mock: boolean }) => !t.is_mock)
+          .map((t: {
+            id: string; name: string; amount: number;
+            date: string; primary_category: string;
           }) => ({
             id: t.id,
             name: t.name,
             amount: t.amount,
             date: t.date,
             category: t.primary_category,
-            isMock: t.is_mock,
-          })
-        );
-      } else {
-        // Mock-only fallback
-        const res = await fetch(`${API}/api/mock-transactions`);
-        if (!res.ok) throw new Error("non-ok");
-        const data = await res.json();
-        txns = (data.transactions ?? []).map(
-          (t: { id: number; name: string; amount: number; date: string; category: string }) => ({
-            id: `mock_${t.id}`,
-            name: t.name,
-            amount: t.amount,
-            date: t.date,
-            category: t.category,
-            isMock: true,
-          })
-        );
+            isMock: false,
+          }));
+        setApiReachable(true);
+      } catch {
+        setApiReachable(false);
       }
+    }
 
-      setTransactions(txns);
-      setApiReachable(true);
-      setPacts((current) => computePactProgress(current, txns));
-      setLastSynced(new Date());
-    } catch {
-      setApiReachable(false);
+    setPlaidTxns(fetchedPlaid);
+
+    const merged = [...fetchedPlaid, ...localMocksRef.current];
+    const prevPacts = pactsRef.current;
+    const updatedPacts = computePactProgress(prevPacts, merged);
+
+    const newlyLost = updatedPacts.find(
+      (p) => p.status === "lost" && prevPacts.find((c) => c.id === p.id)?.status !== "lost"
+    );
+
+    setPacts(updatedPacts);
+    setLastSynced(new Date());
+
+    if (newlyLost) {
+      setActiveLostPact(newlyLost);
+      setScreen("bite");
     }
   }
 
@@ -171,39 +206,42 @@ export function AppShell() {
     await fetchTransactions(true);
   }
 
-  async function addMockTransaction(input: {
-    name: string;
-    amount: number;
-    category: string;
-    date: string;
-  }) {
-    try {
-      await fetch(`${API}/api/mock-transactions`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(input),
-      });
-      await fetchTransactions();
-    } catch {
-      setApiReachable(false);
-    }
+  function addMockTransaction(input: { name: string; amount: number; category: string; date: string }) {
+    const newTxn: Transaction = {
+      id: `mock_${crypto.randomUUID()}`,
+      name: input.name,
+      amount: input.amount,
+      category: input.category,
+      date: input.date,
+      isMock: true,
+    };
+    const updatedMocks = [newTxn, ...localMocksRef.current];
+    const merged = [...plaidTxnsRef.current, ...updatedMocks];
+    const prevPacts = pactsRef.current;
+    const updatedPacts = computePactProgress(prevPacts, merged);
+    const newlyLost = updatedPacts.find(
+      (p) => p.status === "lost" && prevPacts.find((c) => c.id === p.id)?.status !== "lost"
+    );
+    setLocalMocks(updatedMocks);
+    setPacts(updatedPacts);
+    if (newlyLost) { setActiveLostPact(newlyLost); setScreen("bite"); }
   }
 
-  async function deleteMockTransaction(id: string) {
-    const numId = id.replace("mock_", "");
-    try {
-      await fetch(`${API}/api/mock-transactions/${numId}`, { method: "DELETE" });
-      await fetchTransactions();
-    } catch {
-      setApiReachable(false);
-    }
+  function deleteMockTransaction(id: string) {
+    const updatedMocks = localMocksRef.current.filter((t) => t.id !== id);
+    const merged = [...plaidTxnsRef.current, ...updatedMocks];
+    setLocalMocks(updatedMocks);
+    setPacts((current) => computePactProgress(current, merged));
   }
 
-  // On mount: check Plaid status, then fetch with the correct source
+  // On mount: apply local mocks immediately, then check Plaid and fetch real data if connected
   useEffect(() => {
+    const mocks = localMocksRef.current;
+    setPacts((current) => computePactProgress(current, mocks));
+
     checkPlaidStatus().then((connected) => {
       setPlaidConnected(connected);
-      fetchTransactions(connected);
+      if (connected) void fetchTransactions(true);
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -265,7 +303,7 @@ export function AppShell() {
           <div className="hidden items-center gap-3 md:flex">
             <div className="morkis-card flex items-center gap-1.5 px-3 py-1" style={{ borderWidth: 2 }}>
               <Flame className="h-4 w-4 text-coral" />
-              <span className="font-[var(--font-display)] text-sm font-extrabold">12</span>
+              <span className="font-[var(--font-display)] text-sm font-extrabold">{ip.toLocaleString()} IP</span>
             </div>
             <div className="inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-ink bg-moss/10 text-xs font-bold text-moss">
               EK
@@ -284,11 +322,21 @@ export function AppShell() {
             onOpenAddOrg={() => setScreen("orgs")}
             onTriggerFailure={() => setScreen("bite")}
             onDeletePact={(id) => setPacts((current) => current.filter((p) => p.id !== id))}
+            onViewReceipt={(pact) => { setActiveLostPact(pact); setScreen("bite"); }}
           />
         )}
         {screen === "contract" && <ContractScreen organizations={organizations} onCreate={createPact} />}
         {screen === "orgs" && <OrgScreen organizations={organizations} onAdd={addOrg} onRemove={removeOrg} />}
-        {screen === "shop" && <ShopScreen />}
+        {screen === "shop" && (
+          <ShopScreen
+            ip={ip}
+            ownedItems={ownedItems}
+            onBuy={(name, cost) => {
+              setIp((prev) => prev - cost);
+              setOwnedItems((prev) => [...prev, name]);
+            }}
+          />
+        )}
         {screen === "sync" && (
           <SyncScreen
             pacts={pacts}
@@ -298,12 +346,15 @@ export function AppShell() {
             plaidConnected={plaidConnected}
             onSync={() => fetchTransactions()}
             onPlaidConnected={handlePlaidConnected}
-            onAddTransaction={addMockTransaction}
-            onDeleteTransaction={deleteMockTransaction}
+            onAddTransaction={(t) => { addMockTransaction(t); return Promise.resolve(); }}
+            onDeleteTransaction={(id) => { deleteMockTransaction(id); return Promise.resolve(); }}
           />
         )}
         {screen === "bite" && (
-          <FailureScreen payload={failurePayload} onAcknowledge={() => setScreen("home")} />
+          <FailureScreen
+            payload={failurePayload}
+            onAcknowledge={() => { setActiveLostPact(null); setScreen("home"); }}
+          />
         )}
       </main>
 

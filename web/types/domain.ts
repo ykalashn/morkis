@@ -5,7 +5,7 @@ export type Pact = {
   title: string;
   stakeEuro: number;
   daysRemaining: number;
-  status: "on_track" | "danger";
+  status: "on_track" | "danger" | "completed" | "lost";
   progressPercent: number;
   // Transaction sync fields (populated after first sync)
   category?: string;
@@ -36,4 +36,5 @@ export type FailurePayload = {
   failedGoal: string;
   amount: string;
   antiCharity: string;
+  trigger?: string;
 };
